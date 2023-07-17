@@ -16,20 +16,3 @@ export interface PlayerStateDto {
   score: number;
   isConnected: boolean;
 }
-
-export interface createGameRoomDto {
-  name: string;
-  mark: MARK;
-}
-
-export interface joinGameRoomDto {
-  name: string;
-  roomId: string;
-}
-
-export interface moveToGameDto {
-  row: number;
-  col: number;
-  roomId: string;
-  playerId: string;
-}

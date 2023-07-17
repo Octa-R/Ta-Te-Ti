@@ -4,6 +4,7 @@ import { Exclude } from 'class-transformer';
 export class Player {
   @Exclude()
   id: string;
+
   @Exclude()
   socketId: string;
 
@@ -14,5 +15,7 @@ export class Player {
 
   constructor(partial: Partial<Player>) {
     Object.assign(this, partial);
+    this.score = 0;
+    this.isConnected = true;
   }
 }
