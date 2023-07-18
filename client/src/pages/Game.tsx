@@ -4,13 +4,16 @@ import { InnerContainer } from "../components/InnerContainer";
 // import { ConnectionState} from "../ui/ConnectionState"
 import { socket } from "../lib/socket.io-client";
 import { useEffect } from "react"
-import { socketConnectionState } from "../atoms"
-import { useSetRecoilState } from "recoil"
+import { socketConnectionState, nameState, currentPlayerData, gameState } from "../atoms"
+import { useSetRecoilState, useRecoilValue, useRecoilState } from "recoil"
 
 export function Game() {
 
+  const name = useRecoilValue(nameState)
   const setIsConnected = useSetRecoilState(socketConnectionState);
-
+  const playerData = useRecoilValue(currentPlayerData)
+  const setGameState = useSetRecoilState(gameState)
+  // const setSocketConn = useSetRecoilState(currentSocketConnection)
   useEffect(() => {
 
     socket.connect();
@@ -22,12 +25,25 @@ export function Game() {
 
   useEffect(() => {
     const onConnect = () => {
-      console.log("conn")
       setIsConnected(true)
-      socket.emit("room::create", { name: "pepe", mark: "X" }, (data) => {
+      // setSocketConn(socket)
+
+      socket.on("room::opened", (roomId) => {
+        console.log("se creo la room", roomId)
+      })
+
+      socket.on("room::game::over", () => {
+        console.log("termino el juego")
+      })
+
+      socket.on("room::game::state", (state) => {
+        console.log("llego el state y se va a setear", state)
+        setGameState(state)
+      })
+
+      socket.emit("room::create", { name, mark: "X" }, (data) => {
         console.log("se creo la room y nos responden esto:", data)
       })
-      console.log("se emitio el evt create")
     }
 
     const onDisconnect = () => {
@@ -36,23 +52,6 @@ export function Game() {
     }
 
     socket.on("connect", onConnect)
-
-    socket.on("connect_error", (err) => {
-      console.log("error", err)
-    })
-
-    socket.on("room::game::state", (state) => {
-      console.log("llego el state del juego", state)
-    })
-
-    socket.on("room::opened", (roomId) => {
-      console.log("se creo la room", roomId)
-    })
-
-    socket.on("room::game::over", () => {
-      console.log("termino el juego")
-    })
-
     socket.on("disconnect", onDisconnect);
 
     return () => {

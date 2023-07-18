@@ -21,6 +21,7 @@ import { ValidationExceptionFilter } from './exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
 import { GameSocket } from './interfaces';
+import { classToPlain, instanceToPlain } from 'class-transformer';
 
 @UseFilters(new ValidationExceptionFilter())
 @UsePipes(new ValidationPipe())
@@ -54,7 +55,7 @@ export class TatetiGateway
 
   handleConnection(socket: GameSocket, ...args: any[]) {
     console.log('alguien se conectó', socket.id);
-    console.log(socket.eventNames());
+    // console.log(socket.eventNames());
   }
 
   handleDisconnect(socket: GameSocket) {
@@ -64,13 +65,11 @@ export class TatetiGateway
   @UsePipes(new ValidationPipe())
   @SubscribeMessage('room::create')
   createRoom(socket: GameSocket, data: CreateGameRoomDto): any {
-    socket.emit('room::game::over');
-    console.log('event name: ', socket.eventNames());
     console.log({ data });
     const { name, mark } = data;
     const playerId = randomUUID();
     const newRoomId = this.generateRoomId();
-    // socket.join(newRoomId);
+    socket.join(newRoomId);
     console.log('este id:', socket.id, 'se conecto a la room:', newRoomId);
     const newGame: Game = new Game({ roomId: newRoomId });
     newGame.setPlayer1({
@@ -82,8 +81,9 @@ export class TatetiGateway
       isConnected: false,
     });
     this.games.push(newGame);
-    socket.emit('room::game::state', newGame);
-    return newGame;
+    // console.log(instanceToPlain(newGame));
+    socket.emit('room::game::state', instanceToPlain(newGame));
+    return instanceToPlain(newGame);
   }
 
   @SubscribeMessage('room::game::join')

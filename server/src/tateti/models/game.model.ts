@@ -1,15 +1,17 @@
 import { GameStateDto } from '../dto';
 import { CurrentGameState } from '../interfaces';
 import { Player } from './player.model';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 
 export class Game {
   @Exclude()
   id: string;
+  @Type(() => Player)
+  private player1: Player;
+  @Type(() => Player)
+  private player2: Player;
 
   roomId: string;
-  player1: Player;
-  player2: Player;
   status: GAME_STATUS;
   turn: MARK;
   board: VALUE[][];
