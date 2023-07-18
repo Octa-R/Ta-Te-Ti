@@ -30,6 +30,8 @@ export interface ServerToClientEvents {
   ['room::game::over']: () => void;
   ['room::closed']: () => void;
   ['room::opened']: (roomId: string) => void;
+  ['exception']: (data: any) => void;
+  ['room::game::player::data']: (data: any) => void;
 }
 
 export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents>;

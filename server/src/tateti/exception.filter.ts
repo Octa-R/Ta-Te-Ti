@@ -1,28 +1,35 @@
-import { ArgumentsHost, Catch } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  BadRequestException,
+  Catch,
+  ExceptionFilter,
+  Logger,
+} from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
-import { ValidationError } from 'class-validator';
-import { Server, Socket } from 'socket.io';
+import { GameSocket } from './interfaces';
+import {
+  WsBadRequestException,
+  WsUnknownException,
+} from './exceptions/ws-exceptions';
 
 @Catch(WsException)
-export class ValidationExceptionFilter extends BaseWsExceptionFilter<ValidationError> {
-  catch(error: ValidationError, host: ArgumentsHost) {
-    const client = host.switchToWs().getClient<Socket>();
-
-    // const data = client.
-    // const error = exception.getError();
-    // const details = error instanceof Object ? { ...error } : { message: error };
-    console.log('error de validacion');
-    console.log({ error });
-    // no funciona el envio de evento,
-
-    client.send(
-      JSON.stringify({
-        event: 'validation-error',
-        data: {
-          id: (client as any).id,
-          //   ...details,
-        },
-      }),
+export class ValidationExceptionFilter implements ExceptionFilter {
+  catch(exception: Error, host: ArgumentsHost) {
+    Logger.log(
+      'acordate de buscar formas de informar sobre los errores de validacion de input',
     );
+    const socket = host.switchToWs().getClient<GameSocket>();
+
+    if (exception instanceof BadRequestException) {
+      const exceptionData = exception.getResponse();
+
+      const wsException = new WsBadRequestException(
+        exceptionData['message'] ?? 'Bad request',
+      );
+
+      socket.emit('exception', wsException.getError());
+    }
+    const wsException = new WsUnknownException(exception.message);
+    socket.emit('exception', wsException.getError());
   }
 }

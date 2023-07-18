@@ -16,12 +16,13 @@ import { Game } from './models/game.model';
 import { JoinGameRoomDto } from './dto/join-game-room.dto';
 import { CreateGameRoomDto } from './dto/create-game-room.dto';
 import { randomUUID } from 'crypto';
-import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ValidationExceptionFilter } from './exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
 import { GameSocket } from './interfaces';
 import { classToPlain, instanceToPlain } from 'class-transformer';
+import { Namespace } from 'socket.io';
 
 @UseFilters(new ValidationExceptionFilter())
 @UsePipes(new ValidationPipe())
@@ -29,37 +30,35 @@ import { classToPlain, instanceToPlain } from 'class-transformer';
   cors: {
     origin: '*',
   },
+  namespace: 'game',
 })
 export class TatetiGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  server: Server;
+  io: Namespace;
   games: Game[];
+
+  private readonly logger = new Logger(TatetiGateway.name);
 
   constructor() {
     this.games = [];
   }
 
-  private generateRoomId(): string {
-    return randomString.generate({
-      length: 4,
-      charset: 'alphabetic',
-      capitalization: 'uppercase',
-    });
+  afterInit(): void {
+    this.logger.log('Websocket gateway Initialized');
   }
 
-  afterInit(server: Server) {
-    console.log('server inicializado');
-  }
-
-  handleConnection(socket: GameSocket, ...args: any[]) {
-    console.log('alguien se conectó', socket.id);
-    // console.log(socket.eventNames());
+  handleConnection(socket: GameSocket) {
+    // socket.emit() esto lo envia a todos menos la conexion
+    // this.io.emit() esto lo envia a todos incluidos nosotros
+    this.logger.log(`WS client with id: ${socket.id} connected!`);
+    this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
 
   handleDisconnect(socket: GameSocket) {
-    console.log('alguien se desconecto', socket.id);
+    this.logger.log(`Disconnected socket with id: ${socket.id}`);
+    this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
 
   @UsePipes(new ValidationPipe())
@@ -70,9 +69,11 @@ export class TatetiGateway
     const playerId = randomUUID();
     const newRoomId = this.generateRoomId();
     socket.join(newRoomId);
-    console.log('este id:', socket.id, 'se conecto a la room:', newRoomId);
+    this.logger.debug(
+      `cliente with id: ${socket.id} and name: ${name} connected to room ${newRoomId}`,
+    );
     const newGame: Game = new Game({ roomId: newRoomId });
-    newGame.setPlayer1({
+    const player1 = newGame.setPlayer1({
       id: playerId,
       name,
       mark,
@@ -80,10 +81,25 @@ export class TatetiGateway
       score: 0,
       isConnected: false,
     });
+
     this.games.push(newGame);
-    // console.log(instanceToPlain(newGame));
+
+    socket.to(socket.id).emit('room::game::player::data', {
+      playerId,
+      mark: player1.mark,
+      roomId: newRoomId,
+    });
+
     socket.emit('room::game::state', instanceToPlain(newGame));
-    return instanceToPlain(newGame);
+
+    return {
+      message: `room with id: ${newRoomId} created`,
+      data: {
+        playerId,
+        mark,
+        roomId: newRoomId,
+      },
+    };
   }
 
   @SubscribeMessage('room::game::join')
@@ -94,53 +110,53 @@ export class TatetiGateway
     const { name, roomId } = joinGameRoom;
     const playerId = randomUUID();
     const game = this.games.find((game) => game.getRoomId() === roomId);
+
     if (!game) {
-      return {
-        event: 'error',
-        message: 'roomID invalid',
-      };
+      this.logger.error(`rom with id: ${roomId} not found`);
+      return;
     }
-    // socket.join(roomId);
+    socket.join(roomId);
 
-    console.log(socket.eventNames);
+    this.logger.debug(
+      `cliente with id: ${socket.id} and name: ${name} connected to room ${roomId}`,
+    );
 
-    console.log('este id', socket.id, 'se conecto a la room', roomId);
-
-    const newPlayer = game.setPlayer2({
+    const player2 = game.setPlayer2({
       id: playerId,
       name,
       socketId: socket.id,
     });
 
-    console.log('rooms del que se acaba de unbir: ', socket.rooms);
+    socket.to(socket.id).emit('room::game::player::data', {
+      playerId,
+      mark: player2.mark,
+      roomId,
+    });
 
-    socket.to(roomId).emit('room::game::state', game);
+    socket.emit('room::game::state', instanceToPlain(game));
 
     return {
-      message: 'game-room joined succesfully',
-      playerId: playerId,
-      roomId: roomId,
-      mark: newPlayer.mark,
+      message: `game-room with id ${roomId} joined succesfully`,
     };
   }
 
   @SubscribeMessage('room::game::move')
   makeMove(
-    @MessageBody() data: MoveToGameDto,
+    @MessageBody() moveToGame: MoveToGameDto,
     @ConnectedSocket() socket: Socket,
   ): any {
-    const game = this.games.find((game) => game.getRoomId() === data.roomId);
+    const { roomId } = moveToGame;
+    const game = this.games.find((game) => game.getRoomId() === roomId);
     if (!game) {
-      return {
-        event: 'error',
-        message: 'roomID invalid',
-      };
+      this.logger.error(`rom with id: ${roomId} not found`);
+      return;
     }
 
-    game.move({ ...data });
-    socket.to(data.roomId).emit('room::game::state', game);
+    game.move({ ...moveToGame });
+    socket.to(roomId).emit('room::game::state', game);
     return {
       message: 'played succesfully',
+      ok: true,
     };
   }
 
@@ -156,5 +172,13 @@ export class TatetiGateway
     socket.emit('room::game::state', game);
 
     return { message: 'game quitted succesfully' };
+  }
+
+  private generateRoomId(): string {
+    return randomString.generate({
+      length: 4,
+      charset: 'alphabetic',
+      capitalization: 'uppercase',
+    });
   }
 }
