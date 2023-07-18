@@ -20,6 +20,7 @@ import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ValidationExceptionFilter } from './exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
+import { GameSocket } from './interfaces';
 
 @UseFilters(new ValidationExceptionFilter())
 @UsePipes(new ValidationPipe())
@@ -51,22 +52,25 @@ export class TatetiGateway
     console.log('server inicializado');
   }
 
-  handleConnection(socket: any, ...args: any[]) {
+  handleConnection(socket: GameSocket, ...args: any[]) {
     console.log('alguien se conectó', socket.id);
+    console.log(socket.eventNames());
   }
 
-  handleDisconnect(client: any) {
-    console.log('alguien se destó');
+  handleDisconnect(socket: GameSocket) {
+    console.log('alguien se desconecto', socket.id);
   }
+
   @UsePipes(new ValidationPipe())
   @SubscribeMessage('room::create')
-  createRoom(socket: Socket, data: CreateGameRoomDto): any {
+  createRoom(socket: GameSocket, data: CreateGameRoomDto): any {
+    socket.emit('room::game::over');
+    console.log('event name: ', socket.eventNames());
     console.log({ data });
     const { name, mark } = data;
-
     const playerId = randomUUID();
     const newRoomId = this.generateRoomId();
-    socket.join(newRoomId);
+    // socket.join(newRoomId);
     console.log('este id:', socket.id, 'se conecto a la room:', newRoomId);
     const newGame: Game = new Game({ roomId: newRoomId });
     newGame.setPlayer1({
@@ -78,13 +82,14 @@ export class TatetiGateway
       isConnected: false,
     });
     this.games.push(newGame);
+    socket.emit('room::game::state', newGame);
     return newGame;
   }
 
   @SubscribeMessage('room::game::join')
   joinGame(
     @MessageBody() joinGameRoom: JoinGameRoomDto,
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() socket: GameSocket,
   ): any {
     const { name, roomId } = joinGameRoom;
     const playerId = randomUUID();
@@ -95,7 +100,9 @@ export class TatetiGateway
         message: 'roomID invalid',
       };
     }
-    socket.join(roomId);
+    // socket.join(roomId);
+
+    console.log(socket.eventNames);
 
     console.log('este id', socket.id, 'se conecto a la room', roomId);
 
@@ -105,13 +112,9 @@ export class TatetiGateway
       socketId: socket.id,
     });
 
-    socket.emit('room::game::player-connected', {
-      name,
-      id: socket.id,
-      conneted: true,
-    });
+    console.log('rooms del que se acaba de unbir: ', socket.rooms);
 
-    socket.emit('room::game::state', game);
+    socket.to(roomId).emit('room::game::state', game);
 
     return {
       message: 'game-room joined succesfully',
@@ -135,7 +138,7 @@ export class TatetiGateway
     }
 
     game.move({ ...data });
-    socket.emit('room::game::state', game);
+    socket.to(data.roomId).emit('room::game::state', game);
     return {
       message: 'played succesfully',
     };

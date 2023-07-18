@@ -16,6 +16,13 @@ export class Game {
 
   constructor(partial: Partial<Game>) {
     Object.assign(this, partial);
+    this.status = 'WAITING_OPPONENT';
+    this.turn = 'X';
+    this.board = [
+      [' ', ' ', ' '],
+      [' ', ' ', ' '],
+      [' ', ' ', ' '],
+    ];
   }
 
   getRoomId() {
