@@ -6,7 +6,7 @@ import {
   currentRoomIdState,
   gameState,
   isPlayerHostState,
-  nameState,
+  currentPlayerNameState,
   socketConnectionState,
 } from "../atoms";
 import { CurrentGameState } from "../interfaces/game-state";
@@ -15,7 +15,7 @@ export function useGameRoom() {
   const isHost = useRecoilValue(isPlayerHostState);
   const setIsConnected = useSetRecoilState(socketConnectionState);
   const setGameState = useSetRecoilState(gameState);
-  const playerName = useRecoilValue(nameState);
+  const playerName = useRecoilValue(currentPlayerNameState);
   const setPlayerId = useSetRecoilState(currentPlayerIdState);
   const [roomId, setRoomId] = useRecoilState(currentRoomIdState);
 
@@ -29,8 +29,15 @@ export function useGameRoom() {
   const onConnect = () => {
     setIsConnected(true);
 
-    const evt = isHost ? "room::create" : "room::game::join";
-    socket.emit(evt, { mark: "X", name: playerName, roomId }, (data: any) => {
+    const eventName = isHost ? "room::create" : "room::game::join";
+
+    const data = {
+      name: playerName,
+      mark: "X",
+      roomId: roomId,
+    };
+
+    socket.emit(eventName, data, (data: any) => {
       setPlayerId(data.playerId);
       setRoomId(data.roomId);
     });
@@ -44,10 +51,15 @@ export function useGameRoom() {
     setGameState(state);
   };
 
+  const onException = (exception: any) => {
+    console.warn(exception);
+  };
+
   useEffect(() => {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("room::game::state", onGameState);
+    socket.on("exception", onException);
 
     return () => {
       socket.off("connect", onConnect);

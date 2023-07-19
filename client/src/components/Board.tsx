@@ -4,22 +4,22 @@ import { Square } from "./Square";
 function Board() {
 	const [squares, setSquare] = useState<SquareValue[][]>([
 		[" ", " ", " "],
-		[" ", " ", " "],
-		[" ", " ", " "],
+		["O", " ", " "],
+		[" ", "O", " "],
 	]);
 
 	const handleSquareClick = ({ value, position }: SquareClick) => {
 		console.log("value y pos", value, position);
 		const { row, col } = position;
 		const newSquares = squares.slice();
-		newSquares[row][col] = "X";
+		newSquares[row][col] = Math.random() > 0.5 ? "O" : "X";
 		setSquare(newSquares);
 	};
 
 	const classes = [
-		"grid grid-cols-3 grid-rows-3 content-center place-content-center place-items-center gap-1",
-		"rounded-sm aspect-square p-1 shadow-xl",
-		"shadow-indigo-500/50 border-neutral-400 w-96 bg-slate-200"
+		"grid grid-cols-3 grid-rows-3 content-center place-content-center place-items-center ",
+		"rounded-sm aspect-square shadow-xl",
+		"border-0 w-96 bg-slate-500"
 	]
 
 	return (

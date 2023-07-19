@@ -6,19 +6,19 @@ export const socketConnectionState = atom({
   default: false,
 });
 
-export const currentPlayerIdState = atom({
-  key: "currentPlayerIdState",
-  default: "",
-});
-
 export const nameState = atom({
   key: "nameState",
   default: "anon",
 });
 
+export const currentPlayerIdState = atom({
+  key: "currentPlayerIdState",
+  default: "",
+});
+
 export const currentRoomIdState = atom({
   key: "currentRoomId",
-  default: "-",
+  default: "ASDF",
 });
 
 export const isPlayerHostState = atom({
@@ -37,7 +37,16 @@ export const gameState = atom<CurrentGameState>({
     player1: { name: "", score: 0, isConnected: false },
     player2: { name: "", score: 0, isConnected: false },
     status: "WAITING_OPPONENT",
-    roomId: "",
+    roomId: "ASDF",
+  },
+});
+
+export const currentPlayerNameState = selector({
+  key: "currentPlayerNameState",
+  get: ({ get }) => {
+    const state = get(gameState);
+    const isHost = get(isPlayerHostState);
+    return isHost ? state.player1.name : state.player2.name;
   },
 });
 
@@ -45,7 +54,7 @@ export const currentPlayerData = selector({
   key: "currentPlayerData",
   get: ({ get }) => {
     const state = get(gameState);
-    const playerName = get(nameState);
+    const playerName = get(currentPlayerNameState);
 
     if (state.player1.name === playerName) {
       return {
@@ -64,7 +73,7 @@ export const currentOpponentData = selector({
   key: "currentOpponentData",
   get: ({ get }) => {
     const state = get(gameState);
-    const playerName = get(nameState);
+    const playerName = get(currentPlayerNameState);
 
     if (state.player1.name === playerName) {
       return {

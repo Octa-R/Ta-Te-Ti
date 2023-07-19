@@ -3,4 +3,5 @@ export interface ServerToClientEvents {
   ["room::game::over"]: () => void;
   ["room::closed"]: () => void;
   ["room::opened"]: (roomId: string) => void;
+  ["exception"]: (exception: any) => void;
 }
