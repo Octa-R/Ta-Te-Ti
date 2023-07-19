@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Square } from "./Square";
-import { SquareClick } from "../types/SquareClick";
-import { SquareValue } from "../types/SquareValue";
 
 function Board() {
 	const [squares, setSquare] = useState<SquareValue[][]>([

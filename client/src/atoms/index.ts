@@ -6,14 +6,24 @@ export const socketConnectionState = atom({
   default: false,
 });
 
+export const currentPlayerIdState = atom({
+  key: "currentPlayerIdState",
+  default: "",
+});
+
 export const nameState = atom({
   key: "nameState",
   default: "anon",
 });
 
-export const currentRoomId = atom({
+export const currentRoomIdState = atom({
   key: "currentRoomId",
   default: "-",
+});
+
+export const isPlayerHostState = atom({
+  key: "isPlayerHostState",
+  default: false,
 });
 //---- Game State principal
 export const gameState = atom<CurrentGameState>({
