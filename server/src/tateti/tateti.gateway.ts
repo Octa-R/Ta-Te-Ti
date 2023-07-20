@@ -75,9 +75,12 @@ export class TatetiGateway
       return;
     }
     // si el juego existe hace la conexion a la room
-    socket
-      .to(gameState.roomId)
-      .emit('room::game::state', instanceToPlain(gameState));
+    this.logger.debug(
+      `se une el socket ${socket.id} a la room ${gameState.roomId}`,
+    );
+    socket.join(gameState.roomId);
+    // y luego emite el estado
+    socket.emit('room::game::state', instanceToPlain(gameState));
     return {
       message: 'ok',
       ok: true,

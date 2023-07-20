@@ -18,13 +18,12 @@ export const currentPlayerIdState = selector({
   key: "currentPlayerIdState",
   get: ({ get }) => {
     const playerData = get(currentPlayerData);
-    return playerData.roomId;
+    return playerData.playerId;
   },
 });
-
 //---- Game State principal
-export const gameState = atom<CurrentGameState>({
-  key: "gameState",
+export const currentGameState = atom<CurrentGameState>({
+  key: "currentGameState",
   default: {
     board: [
       [" ", " ", " "],
@@ -34,10 +33,10 @@ export const gameState = atom<CurrentGameState>({
     player1: { name: "", score: 0, isConnected: false },
     player2: { name: "", score: 0, isConnected: false },
     status: "WAITING_OPPONENT",
-    roomId: "ASDF",
+    roomId: "NONE",
   },
 });
-// player data
+// player data data que se usa como credencial
 export const currentPlayerData = atom<PlayerData>({
   key: "currentPlayerData",
   default: {
@@ -48,11 +47,29 @@ export const currentPlayerData = atom<PlayerData>({
     isHost: false,
   },
 });
-// oponnent data
-export const currentOpponentData = selector({
-  key: "currentOpponentData",
+// player game state, datos que se usan como estado del jugador
+export const currentPlayerGameState = selector({
+  key: "currentPlayerGameState",
   get: ({ get }) => {
-    const state = get(gameState);
+    const state = get(currentGameState);
+    const { name } = get(currentPlayerData);
+    if (state.player1.name === name) {
+      return {
+        ...state.player1,
+      };
+    }
+    if (state.player2.name === name) {
+      return {
+        ...state.player2,
+      };
+    }
+  },
+});
+// oponnent data
+export const currentOpponentGameState = selector({
+  key: "currentOpponentGameState",
+  get: ({ get }) => {
+    const state = get(currentGameState);
     const { name } = get(currentPlayerData);
     if (state.player1.name === name) {
       return {
@@ -70,14 +87,14 @@ export const currentOpponentData = selector({
 export const currentRoomIdState = selector({
   key: "currentRoomIdState",
   get: ({ get }) => {
-    return get(gameState).roomId;
+    return get(currentGameState).roomId;
   },
 });
 
 export const currentGameStatus = selector({
   key: "currentGameStatus",
   get: ({ get }) => {
-    const state = get(gameState);
+    const state = get(currentGameState);
     return state.status;
   },
 });
@@ -85,7 +102,7 @@ export const currentGameStatus = selector({
 export const currentBoardState = selector({
   key: "currentBoardState",
   get: ({ get }) => {
-    const state = get(gameState);
+    const state = get(currentGameState);
     return state.board;
   },
 });

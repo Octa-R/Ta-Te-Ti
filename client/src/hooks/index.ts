@@ -1,17 +1,16 @@
 import { useEffect } from "react";
 import { socket } from "../lib/socket.io-client";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
+  currentGameState,
   currentPlayerData,
-  currentRoomIdState,
-  gameState,
   socketConnectionState,
 } from "../atoms";
 import { CurrentGameState } from "../interfaces/game-state";
 
 export function useGameRoom() {
   const setIsConnected = useSetRecoilState(socketConnectionState);
-  const setGameState = useSetRecoilState(gameState);
+  const setGameState = useSetRecoilState(currentGameState);
   // const roomId = useRecoilValue(currentRoomIdState);
   const { name, playerId, roomId, mark } = useRecoilValue(currentPlayerData);
 
@@ -39,9 +38,10 @@ export function useGameRoom() {
       roomId: roomId,
       fafa: "lopa",
     };
-    console.log("se va a emitir el evento:");
+    console.log("se va a unir a la gameroom", roomId);
+    console.log(socket.id);
     socket.emit("room::game::join", data, (res: any) => {
-      console.log({ res });
+      console.log({ respuestaEventoJoin: res });
     });
   };
 
@@ -50,6 +50,7 @@ export function useGameRoom() {
   };
 
   const onGameState = (state: CurrentGameState) => {
+    console.log("llego el estado del juego y se va a actualizar", state);
     setGameState(state);
   };
 
@@ -58,6 +59,7 @@ export function useGameRoom() {
   };
 
   useEffect(() => {
+    console.log("se va a subscribir el socket a los eventos");
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("room::game::state", onGameState);

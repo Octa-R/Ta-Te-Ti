@@ -1,5 +1,5 @@
 import { PlayerState } from "../ui/PlayerState"
-import { currentOpponentData, currentPlayerData, currentGameStatus, currentRoomIdState } from "../atoms";
+import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { useCopyToClipboard } from 'usehooks-ts'
 import { ReactComponent as CopyIcon } from "../icons/copy-icon.svg"
@@ -8,12 +8,12 @@ type GameStateProps = {};
 
 const GameState: React.FC<GameStateProps> = ({ }) => {
   const roomId = useRecoilValue(currentRoomIdState)
-  const player = useRecoilValue(currentPlayerData)
-  const opponent = useRecoilValue(currentOpponentData)
+  const player = useRecoilValue(currentPlayerGameState)
+  const opponent = useRecoilValue(currentOpponentGameState)
   const status = useRecoilValue(currentGameStatus)
   const [value, copy] = useCopyToClipboard()
   const hasCopiedText = Boolean(value);
-  console.log(value, hasCopiedText)
+
   return (
     <div className="container text-l w-96 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-300 grid grid-rows-3 gap-1">
       <article className="bg-slate-200 rounded-sm font-bold flex px-2 py-1 items-center">
