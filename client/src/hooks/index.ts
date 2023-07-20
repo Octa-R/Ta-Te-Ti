@@ -34,9 +34,10 @@ export function useGameRoom() {
     const data = {
       name: playerName,
       mark: "X",
-      roomId: roomId,
+      roomId: "roomId",
+      fafa: "lopa",
     };
-
+    console.log("se va a emitir el evento:", eventName);
     socket.emit(eventName, data, (data: any) => {
       setPlayerId(data.playerId);
       setRoomId(data.roomId);

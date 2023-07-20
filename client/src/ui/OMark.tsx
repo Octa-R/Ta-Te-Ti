@@ -8,8 +8,8 @@ export function OMark() {
             color="#000000">
             <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
                 className="stroke-2"
-                stroke-linecap="round"
-                stroke-linejoin="round">
+                strokeLinecap="round"
+                strokeLinejoin="round">
             </path>
         </svg>
     )

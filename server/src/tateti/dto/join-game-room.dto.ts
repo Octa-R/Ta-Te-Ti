@@ -1,4 +1,10 @@
-import { IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class JoinGameRoomDto {
   @MinLength(4)

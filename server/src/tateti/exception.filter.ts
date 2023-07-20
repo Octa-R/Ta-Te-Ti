@@ -11,10 +11,12 @@ import {
   WsBadRequestException,
   WsUnknownException,
 } from './exceptions/ws-exceptions';
+import { ValidationError } from 'class-validator';
 
 @Catch(WsException)
 export class ValidationExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
+    console.log('hola soy el catch');
     Logger.log(
       'acordate de buscar formas de informar sobre los errores de validacion de input',
     );
@@ -28,6 +30,9 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       );
 
       socket.emit('exception', wsException.getError());
+    }
+    if (exception instanceof ValidationError) {
+      Logger.log('error de val');
     }
     const wsException = new WsUnknownException(exception.message);
     socket.emit('exception', wsException.getError());

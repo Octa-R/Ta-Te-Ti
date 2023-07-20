@@ -36,7 +36,23 @@ export class Game {
     return this.player1;
   }
 
+  playerIsHost(playerId: string) {
+    if (this.player1.id === playerId) {
+      return true;
+    }
+    if (this.player2.id === playerId) {
+      return false;
+    }
+  }
+
+  isFull() {
+    return this.player1 && this.player2;
+  }
+
   setPlayer2(player: Partial<Player>): Player {
+    if (this.isFull()) {
+      throw new Error('la room esta llena');
+    }
     this.player2 = new Player(player);
     if ((this.player1.mark = 'X')) {
       this.player2.mark = 'O';
