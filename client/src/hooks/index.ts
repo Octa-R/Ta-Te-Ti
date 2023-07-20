@@ -2,22 +2,18 @@ import { useEffect } from "react";
 import { socket } from "../lib/socket.io-client";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
-  currentPlayerIdState,
+  currentPlayerData,
   currentRoomIdState,
   gameState,
-  isPlayerHostState,
-  currentPlayerNameState,
   socketConnectionState,
 } from "../atoms";
 import { CurrentGameState } from "../interfaces/game-state";
 
 export function useGameRoom() {
-  const isHost = useRecoilValue(isPlayerHostState);
   const setIsConnected = useSetRecoilState(socketConnectionState);
   const setGameState = useSetRecoilState(gameState);
-  const playerName = useRecoilValue(currentPlayerNameState);
-  const setPlayerId = useSetRecoilState(currentPlayerIdState);
-  const [roomId, setRoomId] = useRecoilState(currentRoomIdState);
+  // const roomId = useRecoilValue(currentRoomIdState);
+  const { name, playerId, roomId, mark } = useRecoilValue(currentPlayerData);
 
   useEffect(() => {
     socket.connect();
@@ -26,21 +22,26 @@ export function useGameRoom() {
     };
   }, []);
 
+  // luego de conectarse al socket
+  // se une a la gameroom
+  // enviandole roomId y playerId
+  // si las credenciales son correctas
+  // corresponden con una gameroom existente
+  // entonces
+
   const onConnect = () => {
     setIsConnected(true);
 
-    const eventName = isHost ? "room::create" : "room::game::join";
-
     const data = {
-      name: playerName,
-      mark: "X",
-      roomId: "roomId",
+      name: name,
+      playerId: playerId,
+      mark: mark,
+      roomId: roomId,
       fafa: "lopa",
     };
-    console.log("se va a emitir el evento:", eventName);
-    socket.emit(eventName, data, (data: any) => {
-      setPlayerId(data.playerId);
-      setRoomId(data.roomId);
+    console.log("se va a emitir el evento:");
+    socket.emit("room::game::join", data, (res: any) => {
+      console.log({ res });
     });
   };
 

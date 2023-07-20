@@ -1,30 +1,51 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { TextField } from "../ui/TextField";
-import { useRecoilState, useSetRecoilState } from "recoil";
-import { isPlayerHostState, nameState } from "../atoms";
+import { useSetRecoilState } from "recoil";
+import { currentPlayerData } from "../atoms";
 import { InnerContainer } from "../components/InnerContainer";
-import { useEffect } from "react";
+import { useState } from "react";
 
 export function CreateGame() {
     const navigate = useNavigate();
-    const [playerName, setPlayerName] = useRecoilState<string>(nameState)
-    const setIsHost = useSetRecoilState(isPlayerHostState)
+    const [playerName, setPlayerName] = useState("anon")
+    const setCurrentPlayerData = useSetRecoilState(currentPlayerData)
 
-    useEffect(() => {
-        setIsHost(true)
-    }, [])
+    const handleClick = () => {
+        const fetchData = async () => {
+
+            const res = await fetch("http://localhost:3000/tateti/create", {
+                method: "POST",
+                body: JSON.stringify({ mark: "X", name: playerName }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Error de servidor desconocido");
+            }
+            const json = await res.json()
+            console.log(json)
+            setCurrentPlayerData(json)
+        }
+
+        fetchData()
+            .then(() => {
+                navigate("/game");
+            })
+            .catch(e => {
+                console.log({ e });
+            });
+
+    }
 
     return (
         <InnerContainer>
             <TextField label={"name"} value={playerName} onChange={(value) => {
                 setPlayerName(value)
             }} />
-            <Button
-                onClick={() => {
-                    navigate("/game");
-                }}
-            >
+            <Button onClick={handleClick}>
                 Crear partida
             </Button>
         </InnerContainer>

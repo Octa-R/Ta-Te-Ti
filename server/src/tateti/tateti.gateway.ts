@@ -58,6 +58,9 @@ export class TatetiGateway
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
 
+  // este mensaje se manda para que socket.io conecte el jugador a la room
+  // antes cad jugador debe haber obtenido sus credenciales
+  // en los endpoints http
   @SubscribeMessage('room::game::join')
   joinGame(
     @MessageBody() joinGameRoomDto: any,
@@ -67,12 +70,16 @@ export class TatetiGateway
     const gameState = this.tatetiService.getGameRoomById(
       joinGameRoomDto.roomId,
     );
+    if (!gameState) {
+      this.logger.warn('la room no existe');
+      return;
+    }
     // si el juego existe hace la conexion a la room
     socket
       .to(gameState.roomId)
       .emit('room::game::state', instanceToPlain(gameState));
     return {
-      message: 'played succesfully',
+      message: 'ok',
       ok: true,
     };
   }

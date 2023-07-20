@@ -1,19 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { TextField } from "../ui/TextField";
-import { useRecoilState, useSetRecoilState } from "recoil";
-import { nameState, currentRoomIdState, isPlayerHostState } from "../atoms";
 import { InnerContainer } from "../components/InnerContainer";
-import { useEffect } from "react";
+import { useSetRecoilState } from "recoil";
+import { currentPlayerData } from "../atoms";
+import { useState } from "react";
 
 export function JoinGame() {
-    const [roomId, setRoomId] = useRecoilState<string>(currentRoomIdState)
-    const [playerName, setPlayerName] = useRecoilState<string>(nameState)
     const navigate = useNavigate();
-    const setIsHost = useSetRecoilState(isPlayerHostState)
-    useEffect(() => {
-        setIsHost(true)
-    }, [])
+    const setCurrentPlayerData = useSetRecoilState(currentPlayerData)
+    const [roomId, setRoomId] = useState("")
+    const [playerName, setPlayerName] = useState("anon")
+
+    const handleClick = () => {
+        const fetchData = async () => {
+            const res = await fetch("http://localhost:3000/tateti/create", {
+                method: "POST",
+                body: JSON.stringify({ mark: "X", name: playerName }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            const json = await res.json()
+            console.log(json)
+            setCurrentPlayerData(json)
+        }
+
+        fetchData().then(() => {
+            navigate("/game");
+        }).catch(e => {
+            console.log({ e })
+        })
+
+    }
     return (
         <InnerContainer>
             <TextField label={"name"} value={playerName} onChange={(value) => {
@@ -23,9 +42,7 @@ export function JoinGame() {
                 setRoomId(value)
             }} />
             <Button
-                onClick={() => {
-                    navigate("/game");
-                }}
+                onClick={handleClick}
             >
                 Crear partida
             </Button>

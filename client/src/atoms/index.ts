@@ -6,25 +6,22 @@ export const socketConnectionState = atom({
   default: false,
 });
 
-export const nameState = atom({
-  key: "nameState",
-  default: "anon",
-});
+interface PlayerData {
+  mark: string;
+  name: string;
+  playerId: string;
+  roomId: string;
+  isHost: boolean;
+}
 
-export const currentPlayerIdState = atom({
+export const currentPlayerIdState = selector({
   key: "currentPlayerIdState",
-  default: "",
+  get: ({ get }) => {
+    const playerData = get(currentPlayerData);
+    return playerData.roomId;
+  },
 });
 
-export const currentRoomIdState = atom({
-  key: "currentRoomId",
-  default: "ASDF",
-});
-
-export const isPlayerHostState = atom({
-  key: "isPlayerHostState",
-  default: false,
-});
 //---- Game State principal
 export const gameState = atom<CurrentGameState>({
   key: "gameState",
@@ -40,51 +37,40 @@ export const gameState = atom<CurrentGameState>({
     roomId: "ASDF",
   },
 });
-
-export const currentPlayerNameState = selector({
-  key: "currentPlayerNameState",
-  get: ({ get }) => {
-    const state = get(gameState);
-    const isHost = get(isPlayerHostState);
-    return isHost ? state.player1.name : state.player2.name;
-  },
-});
-
-export const currentPlayerData = selector({
+// player data
+export const currentPlayerData = atom<PlayerData>({
   key: "currentPlayerData",
-  get: ({ get }) => {
-    const state = get(gameState);
-    const playerName = get(currentPlayerNameState);
-
-    if (state.player1.name === playerName) {
-      return {
-        ...state.player1,
-      };
-    }
-    if (state.player2.name === playerName) {
-      return {
-        ...state.player2,
-      };
-    }
+  default: {
+    mark: "",
+    name: "",
+    playerId: "",
+    roomId: "",
+    isHost: false,
   },
 });
-
+// oponnent data
 export const currentOpponentData = selector({
   key: "currentOpponentData",
   get: ({ get }) => {
     const state = get(gameState);
-    const playerName = get(currentPlayerNameState);
-
-    if (state.player1.name === playerName) {
+    const { name } = get(currentPlayerData);
+    if (state.player1.name === name) {
       return {
         ...state.player2,
       };
     }
-    if (state.player2.name === playerName) {
+    if (state.player2.name === name) {
       return {
         ...state.player1,
       };
     }
+  },
+});
+
+export const currentRoomIdState = selector({
+  key: "currentRoomIdState",
+  get: ({ get }) => {
+    return get(gameState).roomId;
   },
 });
 
