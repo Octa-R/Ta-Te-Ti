@@ -1,19 +1,26 @@
-import { useState } from "react";
 import { Square } from "./Square";
+import { useRecoilValue } from "recoil";
+import { currentBoardState, currentPlayerData } from "../atoms";
+import { socket } from "../lib/socket.io-client";
 
 function Board() {
-	const [squares, setSquare] = useState<SquareValue[][]>([
-		[" ", " ", " "],
-		["O", " ", " "],
-		[" ", "O", " "],
-	]);
+	const board = useRecoilValue(currentBoardState)
+	const { roomId, playerId, mark } = useRecoilValue(currentPlayerData)
 
 	const handleSquareClick = ({ value, position }: SquareClick) => {
 		console.log("value y pos", value, position);
 		const { row, col } = position;
-		const newSquares = squares.slice();
-		newSquares[row][col] = Math.random() > 0.5 ? "O" : "X";
-		setSquare(newSquares);
+		const moveToGame = {
+			row,
+			col,
+			roomId,
+			playerId,
+			mark
+		}
+		console.log("se va a hacer la siguiente jugada: ", moveToGame)
+		socket.emit("room::game::move", moveToGame, (res) => {
+			console.log("respuesta servidor desppues del move: ", res)
+		})
 	};
 
 	const classes = [
@@ -26,47 +33,47 @@ function Board() {
 		<div className={classes.join(" ")}>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[0][0]}
+				value={board[0][0]}
 				position={{ row: 0, col: 0 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[0][1]}
+				value={board[0][1]}
 				position={{ row: 0, col: 1 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[0][2]}
+				value={board[0][2]}
 				position={{ row: 0, col: 2 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[1][0]}
+				value={board[1][0]}
 				position={{ row: 1, col: 0 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[1][1]}
+				value={board[1][1]}
 				position={{ row: 1, col: 1 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[1][2]}
+				value={board[1][2]}
 				position={{ row: 1, col: 2 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[2][0]}
+				value={board[2][0]}
 				position={{ row: 2, col: 0 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[2][1]}
+				value={board[2][1]}
 				position={{ row: 2, col: 1 }}
 			/>
 			<Square
 				onSquareClick={handleSquareClick}
-				value={squares[2][2]}
+				value={board[2][2]}
 				position={{ row: 2, col: 2 }}
 			/>
 		</div>

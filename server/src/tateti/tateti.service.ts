@@ -17,7 +17,7 @@ export class TatetiService {
     const roomId = this.generateRoomId();
     const newGame: Game = new Game({ roomId });
 
-    const player1 = newGame.setPlayer1({
+    newGame.setPlayer1({
       id: playerId,
       name,
       mark,
@@ -39,9 +39,7 @@ export class TatetiService {
   }
 
   joinGameRoom({ roomId, name }): NewPlayerDataDto {
-    const game: Game = this.gameRooms.find(
-      (game) => game.getRoomId() === roomId,
-    );
+    const game = this.getGameRoomById(roomId);
 
     if (!game) {
       this.logger.error(`rom with id: ${roomId} not found`);
@@ -83,9 +81,7 @@ export class TatetiService {
   }
 
   quitGame(data): Game {
-    const game = this.gameRooms.find(
-      (game) => game.getRoomId() === data.roomId,
-    );
+    const game = this.getGameRoomById(data.roomId);
 
     game.quit({ ...data });
 

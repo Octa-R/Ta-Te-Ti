@@ -93,9 +93,9 @@ export class TatetiGateway
     @ConnectedSocket() socket: Socket,
   ): any {
     const gameState = this.tatetiService.moveToGame(moveToGame);
-    socket
-      .to(moveToGame.roomId)
-      .emit('room::game::state', instanceToPlain(gameState));
+    this.logger.debug(JSON.stringify(gameState));
+
+    socket.emit('room::game::state', instanceToPlain(gameState));
     return {
       message: 'played succesfully',
       ok: true,
@@ -108,7 +108,7 @@ export class TatetiGateway
     @ConnectedSocket() socket: Socket,
   ): any {
     const gameState = this.tatetiService.quitGame(quitGame);
-
+    this.logger.debug(gameState);
     socket
       .to(gameState.roomId)
       .emit('room::game::state', instanceToPlain(gameState));

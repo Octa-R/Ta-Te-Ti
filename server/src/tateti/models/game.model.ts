@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { GameStateDto } from '../dto';
 import { CurrentGameState } from '../interfaces';
 import { Player } from './player.model';
@@ -15,6 +16,7 @@ export class Game {
   status: GAME_STATUS;
   turn: MARK;
   board: VALUE[][];
+  private readonly logger = new Logger(Game.name);
 
   constructor(partial: Partial<Game>) {
     Object.assign(this, partial);
@@ -45,10 +47,6 @@ export class Game {
     }
   }
 
-  isFull() {
-    return this.player1 && this.player2;
-  }
-
   setPlayer2(player: Partial<Player>): Player {
     if (this.isFull()) {
       throw new Error('la room esta llena');
@@ -62,24 +60,38 @@ export class Game {
     return this.player2;
   }
 
-  move({ row, col, mark, playerId, roomId }) {
-    if (this.roomId !== roomId) {
-      return;
+  getPlayerById(playerId: string) {
+    if (playerId !== this.player1.id) {
+      return this.player1;
     }
-
-    if (playerId !== this.player1.id && playerId !== this.player2.id) {
-      return;
+    if (playerId !== this.player2.id) {
+      return this.player2;
     }
+    return null;
+  }
 
-    if (this.turn !== mark) {
-      return;
-    }
-
+  move({ row, col, mark, playerId }) {
     if (this.board[row][col] !== ' ') {
+      this.logger.log('el cuadrado esta ocupado');
       return;
     }
 
-    this.board[row][col] = mark;
+    const player = this.getPlayerById(playerId);
+
+    if (!player) {
+      this.logger.log('el jugador no pertenece a la partida');
+      return;
+    }
+    // si el turno la marca y la marca del player son iguales
+    if (this.turn === player.mark && this.turn === mark) {
+      this.board[row][col] = mark;
+    }
+    //siguiente turno
+    if (this.turn === 'O') {
+      this.turn = 'X';
+    } else {
+      this.turn = 'O';
+    }
   }
 
   quit({ playerId, roomId }) {
@@ -94,5 +106,9 @@ export class Game {
     if (playerId == this.player2.id) {
       this.player2.isConnected = false;
     }
+  }
+
+  isFull() {
+    return this.player1 && this.player2;
   }
 }
