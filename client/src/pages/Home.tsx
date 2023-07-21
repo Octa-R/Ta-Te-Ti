@@ -7,7 +7,7 @@ export function Home() {
 
   const navigate = useNavigate();
   return (
-    <InnerContainer>
+    <div className="flex bg-sky-700 flex-col w-full h-full items-center justify-center gap-4 p-4">
       <Button
         onClick={() => {
           navigate("/create-game");
@@ -22,6 +22,6 @@ export function Home() {
       >
         Unirse a un juego
       </Button>
-    </InnerContainer>
+    </div>
   );
 }

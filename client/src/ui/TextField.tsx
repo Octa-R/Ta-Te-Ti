@@ -8,11 +8,11 @@ type TextFieldProps = {
 
 export const TextField: React.FC<TextFieldProps> = ({ label, value, onChange }) => {
     return (
-        <div className="text-white font-bold py-2 px-4 rounded max-w-xs max-h-xs">
-            <label className="block text-sm font-medium text-gray-700 uppercase">{label}</label>
+        <div className="flex flex-col max-w-md max-h-md w-full">
+            <label className="text-xl font-bold text-gray-200 uppercase mb-2">{label}</label>
             <input
                 type="text"
-                className="mt-1 block w-full bg-slate-600 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-slate-950 p-2"
+                className="py-3 px-4 text-lg font-bold rounded-lg bg-blue-100 focus:bg-white border border-gray-300 focus:border-blue-500 shadow-sm focus:ring focus:ring-blue-500 focus:ring-opacity-50 text-gray-900 "
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />

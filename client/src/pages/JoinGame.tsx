@@ -34,7 +34,7 @@ export function JoinGame() {
 
     }
     return (
-        <InnerContainer>
+        <div className="flex bg-sky-700 flex-col w-full h-full items-center justify-center gap-4 p-4">
             <TextField label={"name"} value={playerName} onChange={(value) => {
                 setPlayerName(value)
             }} />
@@ -44,8 +44,8 @@ export function JoinGame() {
             <Button
                 onClick={handleClick}
             >
-                Crear partida
+                Unirse a partida
             </Button>
-        </InnerContainer>
+        </div>
     )
 }
