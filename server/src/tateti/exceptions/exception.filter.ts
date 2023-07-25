@@ -6,11 +6,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
-import { GameSocket } from './interfaces';
-import {
-  WsBadRequestException,
-  WsUnknownException,
-} from './exceptions/ws-exceptions';
+import { GameSocket } from '../interfaces';
+import { WsBadRequestException, WsUnknownException } from './ws-exceptions';
 import { ValidationError } from 'class-validator';
 
 @Catch(WsException)

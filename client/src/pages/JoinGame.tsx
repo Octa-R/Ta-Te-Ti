@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { TextField } from "../ui/TextField";
-import { InnerContainer } from "../components/InnerContainer";
 import { useSetRecoilState } from "recoil";
 import { currentPlayerData } from "../atoms";
 import { useState } from "react";
@@ -14,9 +13,11 @@ export function JoinGame() {
 
     const handleClick = () => {
         const fetchData = async () => {
-            const res = await fetch("http://localhost:3000/tateti/create", {
+            const data = { name: playerName, roomId }
+            console.log("se va a acer fetch a /tateti/join con esta data:", data)
+            const res = await fetch("http://localhost:3000/tateti/join", {
                 method: "POST",
-                body: JSON.stringify({ mark: "X", name: playerName }),
+                body: JSON.stringify(data),
                 headers: {
                     "Content-Type": "application/json",
                 },

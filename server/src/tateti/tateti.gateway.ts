@@ -12,7 +12,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ValidationExceptionFilter } from './exception.filter';
+import { ValidationExceptionFilter } from './exceptions/exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
 import { GameSocket } from './interfaces';
@@ -55,6 +55,7 @@ export class TatetiGateway
 
   handleDisconnect(socket: GameSocket) {
     this.logger.log(`Disconnected socket with id: ${socket.id}`);
+    console.log(socket.data);
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
 
@@ -66,7 +67,7 @@ export class TatetiGateway
     @MessageBody() joinGameRoomDto: any,
     @ConnectedSocket() socket: Socket,
   ): any {
-    // const gameState = this.tatetiService.moveToGame(moveToGame);
+    const { roomId } = joinGameRoomDto;
     const gameState = this.tatetiService.getGameRoomById(
       joinGameRoomDto.roomId,
     );
@@ -75,12 +76,10 @@ export class TatetiGateway
       return;
     }
     // si el juego existe hace la conexion a la room
-    this.logger.debug(
-      `se une el socket ${socket.id} a la room ${gameState.roomId}`,
-    );
-    socket.join(gameState.roomId);
+    this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
+    socket.join(roomId);
     // y luego emite el estado
-    socket.emit('room::game::state', instanceToPlain(gameState));
+    this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
     return {
       message: 'ok',
       ok: true,
@@ -92,10 +91,11 @@ export class TatetiGateway
     @MessageBody() moveToGame: MoveToGameDto,
     @ConnectedSocket() socket: Socket,
   ): any {
+    const { roomId } = moveToGame;
     const gameState = this.tatetiService.moveToGame(moveToGame);
     this.logger.debug(JSON.stringify(gameState));
 
-    socket.emit('room::game::state', instanceToPlain(gameState));
+    this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
     return {
       message: 'played succesfully',
       ok: true,

@@ -7,6 +7,7 @@ import { Exclude, Type } from 'class-transformer';
 export class Game {
   @Exclude()
   id: string;
+
   @Type(() => Player)
   private player1: Player;
   @Type(() => Player)
@@ -16,6 +17,8 @@ export class Game {
   status: GAME_STATUS;
   turn: MARK;
   board: VALUE[][];
+
+  @Exclude()
   private readonly logger = new Logger(Game.name);
 
   constructor(partial: Partial<Game>) {
@@ -57,6 +60,7 @@ export class Game {
     } else {
       this.player2.mark = 'X';
     }
+    this.status = 'PLAYING';
     return this.player2;
   }
 
@@ -71,6 +75,18 @@ export class Game {
   }
 
   move({ row, col, mark, playerId }) {
+    if (this.status === 'WAITING_OPPONENT') {
+      this.logger.log(
+        'la partida no puede empezar hasta que se conecte el otro jugador',
+      );
+
+      return;
+    }
+    if (this.status === 'GAME_OVER') {
+      console.log('la partida termino');
+      return;
+    }
+
     if (this.board[row][col] !== ' ') {
       this.logger.log('el cuadrado esta ocupado');
       return;
