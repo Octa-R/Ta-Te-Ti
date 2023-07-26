@@ -65,10 +65,11 @@ export class Game {
   }
 
   getPlayerById(playerId: string) {
-    if (playerId !== this.player1.id) {
+    if (playerId === this.player1?.id) {
+      this.logger.debug(`se devolvera player 1}`);
       return this.player1;
     }
-    if (playerId !== this.player2.id) {
+    if (playerId === this.player2?.id) {
       return this.player2;
     }
     return null;
@@ -110,16 +111,31 @@ export class Game {
     }
   }
 
-  quit({ playerId, roomId }) {
-    if (this.roomId !== roomId) {
-      return;
+  connect({ socketId, playerId }) {
+    this.logger.debug(
+      `llego el playerId: ${playerId} con el socketid: ${socketId}`,
+    );
+    if (playerId === this.player1?.id) {
+      this.logger.debug(`se conecto player 1`);
+      this.player1.socketId = socketId;
     }
+    if (playerId === this.player2?.id) {
+      this.logger.debug(`se conecto player 2`);
+      this.player2.socketId = socketId;
+    }
+    this.logger.debug(`estado del game ${JSON.stringify(this)}`);
+  }
 
-    if (playerId == this.player1.id) {
+  quit(socketId) {
+    // if (this.roomId !== roomId) {
+    //   return;
+    // }
+
+    if (socketId == this.player1.socketId) {
       this.player1.isConnected = false;
     }
 
-    if (playerId == this.player2.id) {
+    if (socketId == this.player2.socketId) {
       this.player2.isConnected = false;
     }
   }

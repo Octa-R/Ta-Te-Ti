@@ -4,6 +4,7 @@ import { Game } from './models/game.model';
 import * as randomString from 'randomstring';
 import { randomUUID } from 'crypto';
 import { MoveToGameDto } from './dto/move-to-game.dto';
+import { QuitGameDto } from './dto/quit-game.dto';
 
 @Injectable()
 export class TatetiService {
@@ -80,10 +81,14 @@ export class TatetiService {
     return game;
   }
 
-  quitGame(data): Game {
+  quitGame(data: QuitGameDto): Game {
     const game = this.getGameRoomById(data.roomId);
+    console.log('se va a desconectar del game', game);
+    if (!game) {
+      return;
+    }
 
-    game.quit({ ...data });
+    game.quit(data.socketId);
 
     return game;
   }

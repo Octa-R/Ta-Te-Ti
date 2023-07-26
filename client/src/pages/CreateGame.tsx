@@ -3,7 +3,6 @@ import Button from "../ui/Button";
 import { TextField } from "../ui/TextField";
 import { useSetRecoilState } from "recoil";
 import { currentPlayerData } from "../atoms";
-import { InnerContainer } from "../components/InnerContainer";
 import { useState } from "react";
 import Selector from "../components/Selector";
 

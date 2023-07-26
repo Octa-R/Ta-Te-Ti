@@ -36,10 +36,13 @@ export function useGameRoom() {
       playerId: playerId,
       mark: mark,
       roomId: roomId,
-      fafa: "lopa",
     };
     console.log("se va a unir a la gameroom", roomId);
     console.log(socket.id);
+    socket.on("disconnect", () => {
+      console.group("se desconecto el socket");
+      socket.emit("room::game::quit", { roomId, playerId });
+    });
     socket.emit("room::game::join", data, (res: any) => {
       console.log({ respuestaEventoJoin: res });
     });
