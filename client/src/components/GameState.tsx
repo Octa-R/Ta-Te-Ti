@@ -1,7 +1,9 @@
 import { PlayerState } from "../ui/PlayerState"
-import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState } from "../atoms";
+import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState, currentTurn } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { RoomIdState } from "./RoomIdState";
+import { XMark } from "../ui/Xmark";
+import { OMark } from "../ui/OMark";
 
 type GameStateProps = {};
 
@@ -10,6 +12,7 @@ const GameState: React.FC<GameStateProps> = ({ }) => {
   const player = useRecoilValue(currentPlayerGameState)
   const opponent = useRecoilValue(currentOpponentGameState)
   const status = useRecoilValue(currentGameStatus)
+  const turn = useRecoilValue(currentTurn)
 
 
   return (
@@ -17,8 +20,13 @@ const GameState: React.FC<GameStateProps> = ({ }) => {
       <RoomIdState roomId={roomId} />
       <PlayerState name={player?.name || ""} score={player?.score || 0} isConnected={player?.isConnected || false} />
       <PlayerState name={opponent?.name || ""} score={opponent?.score || 0} isConnected={opponent?.isConnected || false} />
-      <article className="bg-slate-200 rounded-sm font-bold flex py-1  justify-around items-center px-4 gap-4">
-        {status}
+      <article className="bg-slate-200 rounded-sm font-bold flex py-1  justify-around items-center px-4 gap-4  ">
+        {
+          status === "PLAYING" ?
+            turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />
+            :
+            status
+        }
       </article>
     </div >
   );

@@ -34,6 +34,7 @@ export const currentGameState = atom<CurrentGameState>({
     player2: { name: "", score: 0, isConnected: false },
     status: "WAITING_OPPONENT",
     roomId: "NONE",
+    turn: "X",
   },
 });
 // player data data que se usa como credencial
@@ -104,5 +105,13 @@ export const currentBoardState = selector({
   get: ({ get }) => {
     const state = get(currentGameState);
     return state.board;
+  },
+});
+
+export const currentTurn = selector({
+  key: "currentTurn",
+  get: ({ get }) => {
+    const state = get(currentGameState);
+    return state.turn;
   },
 });

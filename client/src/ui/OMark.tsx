@@ -1,8 +1,16 @@
 
 
-export function OMark() {
+export function OMark({ size }: any) {
+    let sizeClass = "w-6 h-6"; // Tamaño predeterminado (md)
+
+    if (size === "sm") {
+        sizeClass = "w-4 h-4"; // Tamaño pequeño
+    } else if (size === "lg") {
+        sizeClass = "w-8 h-8"; // Tamaño grande
+    }
+    const classes = `stroke-red-500 fill-none ${sizeClass}`
     return (
-        <svg className="h-full stroke-red-500 fill-none p-4"
+        <svg className={classes}
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
             color="#000000">
