@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
+  Inject,
   Post,
   UsePipes,
   ValidationPipe,
@@ -11,6 +13,8 @@ import { CreateGameRoomDto } from './dto/create-game-room.dto';
 import { JoinGameRoomDto } from './dto/join-game-room.dto';
 import { NewPlayerDataDto } from './dto/new-player-data.dto';
 import { TatetiService } from './tateti.service';
+import { RedisService } from 'src/redis/redis.service';
+import Redis from 'ioredis';
 /*
 este controller se encarga de recibir peticiones http
 solo crea y permite unirnos a las rooms
@@ -19,7 +23,16 @@ nos devuelve nuestras credenciales del juego
 @UsePipes(new ValidationPipe())
 @Controller('tateti')
 export class TatetiController {
-  constructor(private tatetiService: TatetiService) {}
+  constructor(
+    private tatetiService: TatetiService,
+    @Inject('REDIS') private readonly redis: Redis,
+  ) {}
+
+  @Get()
+  pingRedis() {
+    return this.redis.ping();
+  }
+
   @Post('create')
   createGameRoom(
     @Body() createGameRoomDto: CreateGameRoomDto,

@@ -5,12 +5,14 @@ import * as randomString from 'randomstring';
 import { randomUUID } from 'crypto';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class TatetiService {
   gameRooms: Game[];
   private readonly logger = new Logger(TatetiService.name);
-  constructor() {
+
+  constructor(private readonly redisService: RedisService) {
     this.gameRooms = [];
   }
   createGameRoom({ name, mark }): NewPlayerDataDto {

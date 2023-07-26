@@ -11,7 +11,13 @@ import {
   WsResponse,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Inject,
+  Logger,
+  UseFilters,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ValidationExceptionFilter } from './exceptions/exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
@@ -20,6 +26,9 @@ import { instanceToPlain } from 'class-transformer';
 import { Namespace } from 'socket.io';
 import { TatetiService } from './tateti.service';
 import { JoinGameRoomDto } from './dto/join-game-room.dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { RedisClient } from 'ioredis/built/connectors/SentinelConnector/types';
+import { Redis } from 'ioredis';
 /*
 este gateway devuelve el estado del juego ante cualquier cambio
 para poder unirse a una gameroom
@@ -47,7 +56,12 @@ export class TatetiGateway
   // el socket se desconecta se puede avisar a la room
   playerRoom = [];
 
-  constructor(private tatetiService: TatetiService) {}
+  constructor(
+    private tatetiService: TatetiService,
+  ) // @Inject('REDIS_SERVICE') private redis: Redis,
+  {
+    // this.redis.hset('key', { name: 'octa' });
+  }
 
   afterInit(): void {
     this.logger.log('Websocket gateway Initialized');
