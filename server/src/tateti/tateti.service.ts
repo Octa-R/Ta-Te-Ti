@@ -5,16 +5,16 @@ import * as randomString from 'randomstring';
 import { randomUUID } from 'crypto';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
-import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class TatetiService {
   gameRooms: Game[];
   private readonly logger = new Logger(TatetiService.name);
 
-  constructor(private readonly redisService: RedisService) {
+  constructor() {
     this.gameRooms = [];
   }
+
   createGameRoom({ name, mark }): NewPlayerDataDto {
     const playerId = randomUUID();
     const roomId = this.generateRoomId();
@@ -76,8 +76,7 @@ export class TatetiService {
     const game = this.getGameRoomById(moveToGame.roomId);
     if (!game) {
       this.logger.error(`rom with id: ${moveToGame.roomId} not found`);
-
-      return Error('not found');
+      throw new Error('not found');
     }
     game.move({ ...moveToGame });
     return game;
@@ -89,7 +88,6 @@ export class TatetiService {
     if (!game) {
       return;
     }
-
     game.quit(data.socketId);
 
     return game;

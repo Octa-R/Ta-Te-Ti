@@ -26,9 +26,9 @@ import { instanceToPlain } from 'class-transformer';
 import { Namespace } from 'socket.io';
 import { TatetiService } from './tateti.service';
 import { JoinGameRoomDto } from './dto/join-game-room.dto';
-import { ClientProxy } from '@nestjs/microservices';
-import { RedisClient } from 'ioredis/built/connectors/SentinelConnector/types';
 import { Redis } from 'ioredis';
+import { Game } from './models/game.model';
+import { ConnectToGameDto } from './dto/connectToGame.dto';
 /*
 este gateway devuelve el estado del juego ante cualquier cambio
 para poder unirse a una gameroom
@@ -51,17 +51,15 @@ export class TatetiGateway
 
   private readonly logger = new Logger(TatetiGateway.name);
 
-  // players: Map<string, string> = new Map();
   //se mapea cada socketId con un roomId asi cuando
   // el socket se desconecta se puede avisar a la room
   playerRoom = [];
+  connectedUsersKey = 'connected_users';
 
   constructor(
+    @Inject('REDIS') private redis: Redis,
     private tatetiService: TatetiService,
-  ) // @Inject('REDIS_SERVICE') private redis: Redis,
-  {
-    // this.redis.hset('key', { name: 'octa' });
-  }
+  ) {}
 
   afterInit(): void {
     this.logger.log('Websocket gateway Initialized');
@@ -72,18 +70,17 @@ export class TatetiGateway
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
 
-  handleDisconnect(socket: GameSocket) {
+  async handleDisconnect(socket: GameSocket) {
     this.logger.log(`Disconnected socket with id: ${socket.id}`);
-    // console.log(socket);
-    // this.logger.debug(socket.id, JSON.stringify(this.playerRoom));
-    const room = this.playerRoom.find((elem) => elem.socketId === socket.id);
-    if (room) {
-      this.logger.debug(
-        `el socketid: ${room.socketId} se desconecto de la room ${room.roomId}`,
-      );
-      const quit = { roomId: room.roomId, socketId: room.socketId };
-      this.logger.debug(quit);
-      this.tatetiService.quitGame(quit);
+
+    const playerRoomId = await this.redis.hget(
+      this.connectedUsersKey,
+      socket.id,
+    );
+
+    this.logger.debug(`se encontro la room ${playerRoomId}`);
+    if (playerRoomId) {
+      await this.redis.hdel(this.connectedUsersKey, socket.id);
     }
 
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
@@ -92,39 +89,27 @@ export class TatetiGateway
   // este mensaje se manda para que socket.io conecte el jugador a la room
   // antes cad jugador debe haber obtenido sus credenciales
   // en los endpoints http
-
-  // TODO fijarse que pasa cuando se desconecta y se vuelve a desconectar un jugador
-  // si
   @SubscribeMessage('room::game::join')
-  joinGame(
-    @MessageBody() joinGameRoomDto: any,
+  async connectToGame(
+    @MessageBody() connectToGame: ConnectToGameDto,
     @ConnectedSocket() socket: Socket,
-  ): any {
-    const { roomId, playerId } = joinGameRoomDto;
-    const gameState = this.tatetiService.getGameRoomById(
-      joinGameRoomDto.roomId,
-    );
+  ): Promise<any> {
+    const { roomId, playerId } = connectToGame;
+
+    const gameState = this.tatetiService.getGameRoomById(roomId);
 
     if (!gameState) {
       this.logger.warn('la room no existe');
       return;
     }
 
-    this.logger.debug('id: ', socket.id);
-
     gameState.connect({ playerId, socketId: socket.id });
-    // si el juego existe hace la conexion a la room
+
     this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
-
     socket.join(roomId);
+    //guarda a que room se conecto el user
+    await this.redis.hset(this.connectedUsersKey, socket.id, roomId);
 
-    //mapea el playerId al roomId, para gestionar las desconexiones
-    // this.players.set(playerId, roomId);
-    this.playerRoom.push({ socketId: socket.id, roomId });
-    // this.logger.debug('players: ', JSON.stringify(this.players.entries()));
-    this.logger.debug(`playerRoom ${this.playerRoom}`);
-
-    // y luego emite el estado
     this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
     return {
       message: 'ok',
@@ -138,29 +123,24 @@ export class TatetiGateway
     @ConnectedSocket() socket: Socket,
   ): any {
     const { roomId } = moveToGame;
-    const gameState = this.tatetiService.moveToGame(moveToGame);
-    this.logger.debug(JSON.stringify(gameState));
-
-    this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
-    return {
-      message: 'played succesfully',
-      ok: true,
-    };
+    try {
+      const gameState: Game = this.tatetiService.moveToGame(moveToGame);
+      this.logger.debug(
+        `se hizo la jugada, este es el estado de la partida ${JSON.stringify(
+          gameState.board,
+        )}`,
+      );
+      this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
+      return {
+        message: 'played succesfully',
+        ok: true,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      return {
+        message: error.message,
+        ok: false,
+      };
+    }
   }
-
-  // @SubscribeMessage('disconnecting')
-  // quitGame(
-  //   @MessageBody() quitGame: QuitGameDto,
-  //   @ConnectedSocket() socket: Socket,
-  // ): any {
-  //   console.log('se desconecto', quitGame);
-  //   console.log(socket);
-  //   // const gameState = this.tatetiService.quitGame(quitGame);
-  //   // this.logger.debug(gameState);
-  //   // socket
-  //   //   .to(gameState.roomId)
-  //   //   .emit('room::game::state', instanceToPlain(gameState));
-
-  //   return { message: 'game quitted succesfully', ok: true };
-  // }
 }

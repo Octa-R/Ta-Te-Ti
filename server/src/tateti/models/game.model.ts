@@ -80,29 +80,42 @@ export class Game {
       this.logger.log(
         'la partida no puede empezar hasta que se conecte el otro jugador',
       );
-
-      return;
+      throw new Error(
+        'la partida no puede empezar hasta que se conecte el otro jugador',
+      );
     }
     if (this.status === 'GAME_OVER') {
       console.log('la partida termino');
-      return;
+      throw new Error('la partida termino');
     }
 
     if (this.board[row][col] !== ' ') {
       this.logger.log('el cuadrado esta ocupado');
-      return;
+      throw new Error('el cuadrado esta ocupado');
     }
 
     const player = this.getPlayerById(playerId);
 
     if (!player) {
       this.logger.log('el jugador no pertenece a la partida');
-      return;
+      throw new Error('el jugador no pertenece a la partida');
     }
+
+    // si el turno la marca y la marca del player son iguales
+    if (
+      this.turn !== player.mark ||
+      this.turn !== mark ||
+      player.mark !== mark
+    ) {
+      this.logger.log('no es el turno del jugador');
+      throw new Error('no es el turno del jugador');
+    }
+
     // si el turno la marca y la marca del player son iguales
     if (this.turn === player.mark && this.turn === mark) {
       this.board[row][col] = mark;
     }
+
     //siguiente turno
     if (this.turn === 'O') {
       this.turn = 'X';
@@ -115,15 +128,18 @@ export class Game {
     this.logger.debug(
       `llego el playerId: ${playerId} con el socketid: ${socketId}`,
     );
-    if (playerId === this.player1?.id) {
+    if (this.player1 && playerId === this.player1?.id) {
       this.logger.debug(`se conecto player 1`);
       this.player1.socketId = socketId;
+      return true;
     }
-    if (playerId === this.player2?.id) {
+    if (this.player2 && playerId === this.player2?.id) {
       this.logger.debug(`se conecto player 2`);
       this.player2.socketId = socketId;
+      return true;
     }
     this.logger.debug(`estado del game ${JSON.stringify(this)}`);
+    return false;
   }
 
   quit(socketId) {

@@ -3,11 +3,10 @@ import { RedisModule } from 'src/redis/redis.module';
 import { TatetiController } from './tateti.controller';
 import { TatetiGateway } from './tateti.gateway';
 import { TatetiService } from './tateti.service';
-import { RedisService } from 'src/redis/redis.service';
 
 @Module({
-  imports: [RedisModule, TatetiModule],
+  imports: [RedisModule],
   controllers: [TatetiController],
-  providers: [TatetiGateway, TatetiService, RedisService],
+  providers: [TatetiGateway, TatetiService],
 })
 export class TatetiModule {}

@@ -13,7 +13,6 @@ import { CreateGameRoomDto } from './dto/create-game-room.dto';
 import { JoinGameRoomDto } from './dto/join-game-room.dto';
 import { NewPlayerDataDto } from './dto/new-player-data.dto';
 import { TatetiService } from './tateti.service';
-import { RedisService } from 'src/redis/redis.service';
 import Redis from 'ioredis';
 /*
 este controller se encarga de recibir peticiones http
