@@ -4,7 +4,7 @@ import { TextField } from "../ui/TextField";
 import { useSetRecoilState } from "recoil";
 import { currentPlayerData } from "../atoms";
 import { useState } from "react";
-import Selector from "../components/Selector";
+import Selector from "../ui/Selector";
 
 export function CreateGame() {
     const navigate = useNavigate();

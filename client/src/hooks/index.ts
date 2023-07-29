@@ -42,7 +42,6 @@ export function useGameRoom() {
     console.log(socket.id);
 
     socket.on("disconnect", () => {
-      console.group("se desconecto el socket");
       socket.emit("room::game::quit", { roomId, playerId });
     });
 

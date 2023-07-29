@@ -13,7 +13,7 @@ const Selector = () => {
                 className={`py-4 px-6 rounded-full text-lg font-bold ${selectedOption === 'X' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
                     }`}
                 onClick={() => handleOptionChange('X')}
-                style={{ outline: 'none' }} // Agregar esta línea para eliminar el contorno de enfoque
+                style={{ outline: 'none' }}
             >
                 X
             </button>
@@ -21,7 +21,7 @@ const Selector = () => {
                 className={`py-4 px-6 rounded-full text-lg font-bold ${selectedOption === 'O' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
                     }`}
                 onClick={() => handleOptionChange('O')}
-                style={{ outline: 'none' }} // Agregar esta línea para eliminar el contorno de enfoque
+                style={{ outline: 'none' }}
             >
                 O
             </button>

@@ -1,13 +1,68 @@
-import { PlayerState } from "../ui/PlayerState"
 import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState, currentTurn } from "../atoms";
 import { useRecoilValue } from "recoil";
-import { RoomIdState } from "./RoomIdState";
 import { XMark } from "../ui/Xmark";
 import { OMark } from "../ui/OMark";
+import { ReactComponent as CopyIcon } from "../icons/copy-icon.svg"
+import { ReactComponent as CheckIcon } from "../icons/check-icon.svg"
+import { useCopyToClipboard } from 'usehooks-ts'
+import React, { useState } from "react"
+import { ConnectionState } from "../ui/ConnectionState";
 
-type GameStateProps = {};
+type PlayerStateProps = {
+  name: string;
+  isConnected: boolean;
+  score: number;
+}
 
-const GameState: React.FC<GameStateProps> = ({ }) => {
+export const PlayerState: React.FC<PlayerStateProps> = ({ name, isConnected, score }) => {
+  return (
+    <div className="bg-slate-200 rounded-sm font-bold flex justify-around items-center px-4 gap-4">
+      <ConnectionState isConnected={isConnected} />
+      <span className="uppercase">{name}</span>
+      <span className="proportional-nums ml-auto">{score}</span>
+    </div>
+  );
+};
+
+type Props = {
+  roomId: string
+}
+
+export const RoomIdState: React.FC<Props> = ({ roomId }) => {
+  const [value, copy] = useCopyToClipboard()
+  const [hasCopiedText, setHasCopiedText] = useState(Boolean(value))
+
+  return (
+    <article className="bg-slate-200 rounded-sm font-bold flex py-1 justify-start items-center px-4 gap-4">
+      <div className="h-2 w-2 "></div>
+      <label>Room-ID:</label>
+      <div className="flex rounded-md border-2 grow-1 ml-auto">
+
+        <p className="bg-slate-100 text-black rounded pl-2 align-middle border border-slate-600 flex flex-row gap-1 justify-between grow-1">{roomId}
+
+          <button
+            disabled={hasCopiedText}
+            className="link"
+            onClick={() => {
+              copy(roomId)
+              setHasCopiedText(true)
+              setTimeout(() => {
+                setHasCopiedText(false)
+              }, 3000)
+            }}
+          >
+            <div className="bg-slate-500  rounded-e">
+
+              {hasCopiedText ? <CheckIcon /> : <CopyIcon />}
+            </div>
+          </button>
+        </p>
+      </div>
+    </article>
+  )
+}
+
+const GameState: React.FC<any> = ({ }) => {
   const roomId = useRecoilValue(currentRoomIdState)
   const player = useRecoilValue(currentPlayerGameState)
   const opponent = useRecoilValue(currentOpponentGameState)

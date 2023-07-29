@@ -137,6 +137,7 @@ export class TatetiGateway
       };
     } catch (error) {
       this.logger.error(error);
+      this.io.to(roomId).emit('exception', error.message);
       return {
         message: error.message,
         ok: false,
