@@ -16,14 +16,18 @@ const GameState: React.FC<GameStateProps> = ({ }) => {
 
 
   return (
-    <div className="container text-l w-96 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1">
+    <div className="container text-l w-64 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1">
       <RoomIdState roomId={roomId} />
       <PlayerState name={player?.name || ""} score={player?.score || 0} isConnected={player?.isConnected || false} />
       <PlayerState name={opponent?.name || ""} score={opponent?.score || 0} isConnected={opponent?.isConnected || false} />
-      <article className="bg-slate-200 rounded-sm font-bold flex py-1  justify-around items-center px-4 gap-4  ">
+      <article className="bg-slate-200 rounded-sm font-bold flex py-1 justify-center items-center px-4 gap-4">
         {
-          status === "PLAYING" ?
-            turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />
+          status === "PLAYING" ? (
+            <>
+              <label>Turn: </label>
+              {turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />}
+            </>
+          )
             :
             status
         }

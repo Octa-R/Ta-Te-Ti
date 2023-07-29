@@ -12,18 +12,18 @@ const Square: React.FC<SquareProps> = ({ value, onSquareClick, position }) => {
 		value === " "
 			? "transition duration-500 ease-in-out  hover:bg-blue-300"
 
-			: "pointer-events-none ";
+			: " ";
 	return (
 
 		<button
 			className={
-				"aspect-square rounded-sm h-28 border-solid bg-slate-300 " +
+				"aspect-square rounded-sm h-28 border-solid bg-slate-300 flex justify-center items-center " +
 				activeSquare
 			}
 			onClick={() => onSquareClick({ value, position })}
 		>
 			{
-				value === "X" && <XMark /> || value === "O" && <OMark /> || " "
+				value === "X" && <XMark size="lg" /> || value === "O" && <OMark size="lg" /> || " "
 			}
 		</button>
 	);
