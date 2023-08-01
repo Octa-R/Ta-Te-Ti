@@ -37,9 +37,8 @@ export const RoomIdState: React.FC<Props> = ({ roomId }) => {
       <div className="h-2 w-2 "></div>
       <label>Room-ID:</label>
       <div className="flex rounded-md border-2 grow-1 ml-auto">
-
-        <p className="bg-slate-100 text-black rounded pl-2 align-middle border border-slate-600 flex flex-row gap-1 justify-between grow-1">{roomId}
-
+        <div className="bg-slate-100 text-black rounded pl-2 align-middle border border-slate-600 flex flex-row gap-1 justify-between grow-1">
+          {roomId}
           <button
             disabled={hasCopiedText}
             className="link"
@@ -52,23 +51,21 @@ export const RoomIdState: React.FC<Props> = ({ roomId }) => {
             }}
           >
             <div className="bg-slate-500  rounded-e">
-
               {hasCopiedText ? <CheckIcon /> : <CopyIcon />}
             </div>
           </button>
-        </p>
+        </div>
       </div>
     </article>
   )
 }
 
-const GameState: React.FC<any> = ({ }) => {
+export const GameState: React.FC<any> = ({ }) => {
   const roomId = useRecoilValue(currentRoomIdState)
   const player = useRecoilValue(currentPlayerGameState)
   const opponent = useRecoilValue(currentOpponentGameState)
   const status = useRecoilValue(currentGameStatus)
   const turn = useRecoilValue(currentTurn)
-
 
   return (
     <div className="container text-l w-64 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1">
@@ -90,5 +87,3 @@ const GameState: React.FC<any> = ({ }) => {
     </div >
   );
 };
-
-export { GameState };

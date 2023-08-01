@@ -22,16 +22,21 @@ export function JoinGame() {
                     "Content-Type": "application/json",
                 },
             })
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Error de servidor desconocido");
+            }
             const json = await res.json()
-            console.log(json)
             setCurrentPlayerData(json)
         }
 
-        fetchData().then(() => {
-            navigate("/game");
-        }).catch(e => {
-            console.log({ e })
-        })
+        fetchData()
+            .then(() => {
+                navigate("/game");
+            })
+            .catch(e => {
+                console.warn(e.message)
+            })
 
     }
     return (

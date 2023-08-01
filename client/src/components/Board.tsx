@@ -31,7 +31,7 @@ const Square: React.FC<SquareProps> = ({ value, onSquareClick, position }) => {
 };
 
 
-function Board() {
+export function Board() {
 	const board = useRecoilValue(currentBoardState)
 	const { roomId, playerId, mark } = useRecoilValue(currentPlayerData)
 
@@ -107,5 +107,3 @@ function Board() {
 		</div>
 	);
 }
-
-export { Board };
