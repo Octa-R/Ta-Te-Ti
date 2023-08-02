@@ -13,13 +13,17 @@ export class Player {
   score: number;
   isConnected: boolean;
 
-  setSocketId(id: string) {
-    this.socketId = id;
-  }
-
   constructor(partial: Partial<Player>) {
     Object.assign(this, partial);
     this.score = 0;
     this.isConnected = true;
+  }
+
+  setSocketId(id: string) {
+    this.socketId = id;
+  }
+
+  incrementScore() {
+    this.score++;
   }
 }

@@ -26,6 +26,7 @@ export function CreateGame() {
                 throw new Error(errorData.message || "Error de servidor desconocido");
             }
             const json = await res.json()
+            console.log(json)
             setCurrentPlayerData(json)
         }
 

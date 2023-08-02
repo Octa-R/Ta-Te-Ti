@@ -8,6 +8,9 @@ export class Game {
   @Exclude()
   id: string;
 
+  @Exclude()
+  turns: number;
+
   @Type(() => Player)
   private player1: Player;
   @Type(() => Player)
@@ -18,6 +21,8 @@ export class Game {
   turn: MARK;
   board: VALUE[][];
 
+  matchResult: MATCH_RESULT;
+
   @Exclude()
   private readonly logger = new Logger(Game.name);
 
@@ -25,6 +30,7 @@ export class Game {
     Object.assign(this, partial);
     this.status = 'WAITING_OPPONENT';
     this.turn = 'X';
+    this.turns = 0;
     this.board = [
       [' ', ' ', ' '],
       [' ', ' ', ' '],
@@ -84,6 +90,7 @@ export class Game {
         'la partida no puede empezar hasta que se conecte el otro jugador',
       );
     }
+
     if (this.status === 'GAME_OVER') {
       console.log('la partida termino');
       throw new Error('la partida termino');
@@ -121,6 +128,79 @@ export class Game {
       this.turn = 'X';
     } else {
       this.turn = 'O';
+    }
+
+    this.turns++;
+    this.logger.debug(`turns: ${this.turns}`);
+
+    if (this.turns >= 5) {
+      //chequear si hay o no un ganador
+      const [isGameOver, winner] = this.checkWinner();
+
+      if (isGameOver) {
+        this.status = 'GAME_OVER';
+        this.logger.log(`el juego termino winner: ${winner}`);
+        if (winner) {
+          if (winner === 'X') {
+            this.matchResult = 'X_WINS';
+          }
+          if (winner === 'O') {
+            this.matchResult = 'O_WINS';
+          }
+        }
+        if (this.player1.mark === winner) {
+          this.player1.incrementScore();
+        } else if (this.player2.mark === winner) {
+          this.player2.incrementScore();
+        } else if (!winner) {
+          this.logger.log('empate o TIE');
+          this.matchResult = 'TIE';
+        }
+      } else {
+        this.logger.log('el juego todavia no termino');
+      }
+    }
+  }
+
+  private checkWinner() {
+    // Chequear filas
+    for (const row of this.board) {
+      if (row[0] === row[1] && row[1] === row[2] && row[0] !== ' ') {
+        return [true, row[0]];
+      }
+    }
+    // Chequear columnas
+    for (let col = 0; col < 3; col++) {
+      if (
+        this.board[0][col] === this.board[1][col] &&
+        this.board[1][col] === this.board[2][col] &&
+        this.board[0][col] !== ' '
+      ) {
+        return [true, this.board[0][col]];
+      }
+    }
+
+    // Chequear diagonales
+    if (
+      this.board[0][0] === this.board[1][1] &&
+      this.board[1][1] === this.board[2][2] &&
+      this.board[0][0] !== ' '
+    ) {
+      return [true, this.board[0][0]];
+    }
+
+    if (
+      this.board[0][2] === this.board[1][1] &&
+      this.board[1][1] === this.board[2][0] &&
+      this.board[0][2] !== ' '
+    ) {
+      return [true, this.board[0][2]];
+    }
+
+    if (this.turns === 9) {
+      return [true, 'TIE'];
+    } else {
+      return [false, null];
     }
   }
 
