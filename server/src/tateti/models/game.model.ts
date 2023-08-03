@@ -7,9 +7,12 @@ import { Exclude, Type } from 'class-transformer';
 export class Game {
   @Exclude()
   id: string;
-
   @Exclude()
   turns: number;
+  @Exclude()
+  player1WantsToPlayAgain: boolean;
+  @Exclude()
+  player2WantsToPlayAgain: boolean;
 
   @Type(() => Player)
   private player1: Player;
@@ -20,7 +23,6 @@ export class Game {
   status: GAME_STATUS;
   turn: MARK;
   board: VALUE[][];
-
   matchResult: MATCH_RESULT;
 
   @Exclude()
@@ -79,6 +81,37 @@ export class Game {
       return this.player2;
     }
     return null;
+  }
+
+  setPlayerWantsToPlayAgain(data) {
+    const player = this.getPlayerById(data.playerId);
+    if (!player) {
+      throw new Error();
+    }
+
+    if (this.playerIsHost(player.id)) {
+      this.player1WantsToPlayAgain = true;
+    } else {
+      this.player2WantsToPlayAgain = true;
+    }
+
+    if (this.player1WantsToPlayAgain && this.player2WantsToPlayAgain) {
+      this.resetGame();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private resetGame(): void {
+    this.board = [
+      [' ', ' ', ' '],
+      [' ', ' ', ' '],
+      [' ', ' ', ' '],
+    ];
+    this.turn = 'X';
+    this.turns = 0;
+    this.status = 'PLAYING';
   }
 
   move({ row, col, mark, playerId }) {

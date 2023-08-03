@@ -64,7 +64,6 @@ export function useGameRoom() {
   };
 
   useEffect(() => {
-    console.log("se va a subscribir el socket a los eventos");
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("room::game::state", onGameState);

@@ -97,6 +97,12 @@ export class TatetiService {
     return this.gameRooms.find((game) => game.getRoomId() === roomId);
   }
 
+  playAgain(playAgain) {
+    const game = this.getGameRoomById(playAgain.roomId);
+    game.setPlayerWantsToPlayAgain(playAgain);
+    return game;
+  }
+
   private generateRoomId(): string {
     return randomString.generate({
       length: 4,

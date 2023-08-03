@@ -1,12 +1,13 @@
-import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState, currentTurn } from "../atoms";
+import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState, currentTurn, currentPlayerData, currentMatchResult } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { XMark } from "../ui/Xmark";
 import { OMark } from "../ui/OMark";
 import { ReactComponent as CopyIcon } from "../icons/copy-icon.svg"
 import { ReactComponent as CheckIcon } from "../icons/check-icon.svg"
 import { useCopyToClipboard } from 'usehooks-ts'
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { ConnectionState } from "../ui/ConnectionState";
+import { socket } from "../lib/socket.io-client";
 
 type PlayerStateProps = {
   name: string;
@@ -66,23 +67,42 @@ export const GameState: React.FC<any> = ({ }) => {
   const opponent = useRecoilValue(currentOpponentGameState)
   const status = useRecoilValue(currentGameStatus)
   const turn = useRecoilValue(currentTurn)
+  const { playerId } = useRecoilValue(currentPlayerData)
+  const matchResult = useRecoilValue(currentMatchResult)
+
+  useEffect(() => {
+    if (status === "GAME_OVER") {
+      setTimeout(() => {
+        socket.emit("room::game::play_again", { playerId, roomId }, (response: any) => {
+          console.log(response)
+        })
+      }, 5000)
+    }
+  }, [status])
+
+  const renderSwitch = (param: any) => {
+    switch (param) {
+      case "WAITING_OPPONENT":
+        return "Esperando oponente";
+      case "PLAYING":
+        return (<>
+          <label>Turn: </label>
+          {turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />}
+        </>)
+      case "GAME_OVER":
+        return matchResult
+      default:
+        return param;
+    }
+  }
 
   return (
-    <div className="container text-l w-64 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1">
+    <div className="container text-l w-64 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1 shadow-xl">
       <RoomIdState roomId={roomId} />
       <PlayerState name={player?.name || ""} score={player?.score || 0} isConnected={player?.isConnected || false} />
       <PlayerState name={opponent?.name || ""} score={opponent?.score || 0} isConnected={opponent?.isConnected || false} />
       <article className="bg-slate-200 rounded-sm font-bold flex py-1 justify-center items-center px-4 gap-4">
-        {
-          status === "PLAYING" ? (
-            <>
-              <label>Turn: </label>
-              {turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />}
-            </>
-          )
-            :
-            status
-        }
+        {renderSwitch(status)}
       </article>
     </div >
   );

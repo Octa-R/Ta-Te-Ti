@@ -7,4 +7,5 @@ export interface CurrentGameState {
   status: string;
   roomId: string;
   turn: string;
+  matchResult: string;
 }

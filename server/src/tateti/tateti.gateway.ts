@@ -144,4 +144,30 @@ export class TatetiGateway
       };
     }
   }
+
+  @SubscribeMessage('room::game::play_again')
+  playAgain(
+    @MessageBody() playAgain: any,
+    @ConnectedSocket() socket: Socket,
+  ): any {
+    const { roomId, playerId } = playAgain;
+    try {
+      const gameState: Game = this.tatetiService.playAgain(playAgain);
+      this.logger.debug(
+        `el jugador con id${playerId} quiere jugar de vuelta en la room ${roomId}`,
+      );
+      this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
+      return {
+        message: 'play again',
+        ok: true,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      this.io.to(roomId).emit('exception', error.message);
+      return {
+        message: error.message,
+        ok: false,
+      };
+    }
+  }
 }
