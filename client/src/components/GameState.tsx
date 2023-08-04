@@ -90,7 +90,17 @@ export const GameState: React.FC<any> = ({ }) => {
           {turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />}
         </>)
       case "GAME_OVER":
-        return matchResult
+        switch (matchResult) {
+          case "TIE":
+            return "Empate"
+          case "X_WINS":
+            return "Gana X"
+          case "O_WINS":
+            return "Gana O"
+          default:
+            return "Error"
+        }
+
       default:
         return param;
     }

@@ -1,24 +1,32 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NewPlayerDataDto } from './dto/new-player-data.dto';
 import { Game } from './models/game.model';
 import * as randomString from 'randomstring';
 import { randomUUID } from 'crypto';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { QuitGameDto } from './dto/quit-game.dto';
+import Redis from 'ioredis';
+import { ConnectToGameDto } from './dto/connectToGame.dto';
 
 @Injectable()
 export class TatetiService {
   gameRooms: Game[];
+  activeGameRoomsKey = 'active_rooms';
+
   private readonly logger = new Logger(TatetiService.name);
 
-  constructor() {
+  constructor(@Inject('REDIS') private redis: Redis) {
     this.gameRooms = [];
   }
 
-  createGameRoom({ name, mark }): NewPlayerDataDto {
+  async createGameRoom({ name, mark }): Promise<NewPlayerDataDto> {
     const playerId = randomUUID();
+    const longRoomId = randomUUID();
     const roomId = this.generateRoomId();
-    const newGame: Game = new Game({ roomId });
+    const newGame: Game = new Game({ roomId, id: longRoomId });
+
+    // asocia el shortId generado con el longId
+    await this.redis.hset(this.activeGameRoomsKey, roomId, longRoomId);
 
     newGame.setPlayer1({
       id: playerId,
@@ -28,6 +36,7 @@ export class TatetiService {
       isConnected: false,
     });
 
+    //aca deberia guardar la partida
     this.gameRooms.push(newGame);
 
     return {
@@ -41,17 +50,18 @@ export class TatetiService {
     };
   }
 
-  joinGameRoom({ roomId, name }): NewPlayerDataDto {
-    const game = this.getGameRoomById(roomId);
+  async joinGameRoom({ roomId, name }): Promise<NewPlayerDataDto> {
+    const longRoomId = await this.redis.hget('active_rooms', roomId);
+    const game = this.getGameRoomById(longRoomId);
 
     if (!game) {
-      this.logger.error(`rom with id: ${roomId} not found`);
-      throw new Error(`rom with id: ${roomId} not found`);
+      this.logger.error(`room with id: ${roomId} not found`);
+      throw new Error(`room with id: ${roomId} not found`);
     }
 
     if (game.isFull()) {
-      this.logger.error(`rom with id: ${roomId} is full`);
-      throw new Error(`rom with id: ${roomId} is full`);
+      this.logger.error(`room with id: ${roomId} is full`);
+      throw new Error(`room with id: ${roomId} is full`);
     }
 
     const playerId = randomUUID();
@@ -72,8 +82,27 @@ export class TatetiService {
     };
   }
 
-  moveToGame(moveToGame: MoveToGameDto) {
-    const game = this.getGameRoomById(moveToGame.roomId);
+  async playerEnterGameRoom(connectToGame: ConnectToGameDto) {
+    const { roomId, playerId } = connectToGame;
+    //obitene long roomid
+    const longRoomId = await this.redis.hget('active_rooms', roomId);
+    //obtiene el juego
+    const gameState: Game = this.getGameRoomById(longRoomId);
+
+    if (!gameState) {
+      this.logger.warn('la room no existe');
+      throw new Error('la room no existe');
+    }
+
+    // conecto al player con el juego
+    gameState.playerConnect({ playerId });
+    return gameState;
+  }
+
+  async moveToGame(moveToGame: MoveToGameDto) {
+    const { roomId } = moveToGame;
+    const longRoomId = await this.redis.hget('active_rooms', roomId);
+    const game = this.getGameRoomById(longRoomId);
     if (!game) {
       this.logger.error(`rom with id: ${moveToGame.roomId} not found`);
       throw new Error('not found');
@@ -82,23 +111,26 @@ export class TatetiService {
     return game;
   }
 
-  quitGame(data: QuitGameDto): Game {
-    const game = this.getGameRoomById(data.roomId);
-    console.log('se va a desconectar del game', game);
+  async playerDisconnect(quitGame: QuitGameDto): Promise<Game> {
+    const { roomId, playerId } = quitGame;
+    const longRoomId = await this.redis.hget('active_rooms', roomId);
+    const game = this.getGameRoomById(longRoomId);
     if (!game) {
-      return;
+      throw Error;
     }
-    game.quit(data.socketId);
-
+    game.quit(playerId);
+    this.logger.debug(`se va a enviar esto ${JSON.stringify(game)}`);
     return game;
   }
 
-  getGameRoomById(roomId: string): Game {
-    return this.gameRooms.find((game) => game.getRoomId() === roomId);
+  getGameRoomById(id: string): Game {
+    return this.gameRooms.find((game) => game.id === id);
   }
 
-  playAgain(playAgain) {
-    const game = this.getGameRoomById(playAgain.roomId);
+  async playAgain(playAgain) {
+    const { roomId } = playAgain;
+    const longRoomId = await this.redis.hget('active_rooms', roomId);
+    const game = this.getGameRoomById(longRoomId);
     game.setPlayerWantsToPlayAgain(playAgain);
     return game;
   }

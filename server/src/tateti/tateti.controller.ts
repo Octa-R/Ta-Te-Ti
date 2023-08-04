@@ -33,16 +33,18 @@ export class TatetiController {
   }
 
   @Post('create')
-  createGameRoom(
+  async createGameRoom(
     @Body() createGameRoomDto: CreateGameRoomDto,
-  ): NewPlayerDataDto {
-    return this.tatetiService.createGameRoom(createGameRoomDto);
+  ): Promise<NewPlayerDataDto> {
+    return await this.tatetiService.createGameRoom(createGameRoomDto);
   }
 
   @Post('join')
-  joinGameRoom(@Body() joinGameRoomDto: JoinGameRoomDto): NewPlayerDataDto {
+  async joinGameRoom(
+    @Body() joinGameRoomDto: JoinGameRoomDto,
+  ): Promise<NewPlayerDataDto> {
     try {
-      return this.tatetiService.joinGameRoom(joinGameRoomDto);
+      return await this.tatetiService.joinGameRoom(joinGameRoomDto);
     } catch (error) {
       throw new HttpException(
         {

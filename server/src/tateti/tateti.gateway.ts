@@ -20,7 +20,6 @@ import {
 } from '@nestjs/common';
 import { ValidationExceptionFilter } from './exceptions/exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
-import { QuitGameDto } from './dto/quit-game.dto';
 import { GameSocket } from './interfaces';
 import { instanceToPlain } from 'class-transformer';
 import { Namespace } from 'socket.io';
@@ -48,12 +47,8 @@ export class TatetiGateway
 {
   @WebSocketServer()
   io: Namespace;
-
   private readonly logger = new Logger(TatetiGateway.name);
 
-  //se mapea cada socketId con un roomId asi cuando
-  // el socket se desconecta se puede avisar a la room
-  playerRoom = [];
   connectedUsersKey = 'connected_users';
 
   constructor(
@@ -73,15 +68,25 @@ export class TatetiGateway
   async handleDisconnect(socket: GameSocket) {
     this.logger.log(`Disconnected socket with id: ${socket.id}`);
 
-    const playerRoomId = await this.redis.hget(
-      this.connectedUsersKey,
-      socket.id,
-    );
-
-    this.logger.debug(`se encontro la room ${playerRoomId}`);
-    if (playerRoomId) {
-      await this.redis.hdel(this.connectedUsersKey, socket.id);
+    const data = await this.redis.hget(this.connectedUsersKey, socket.id);
+    if (!data) {
+      this.logger.error('no se encontro la room para ese socket');
+      return;
     }
+    const { roomId, playerId } = JSON.parse(data);
+
+    this.logger.debug(`el socket se desconecto de la room`, roomId, playerId);
+    if (!roomId || !playerId) {
+      this.logger.debug('se rompio, no hay player ni roomId');
+    }
+    await this.redis.hdel(this.connectedUsersKey, socket.id);
+    const game = await this.tatetiService.playerDisconnect({
+      roomId,
+      playerId,
+    });
+    const gameState = instanceToPlain(game);
+    this.logger.debug(`se va a enviar esto ${JSON.stringify(gameState)}`);
+    this.io.to(roomId).emit('room::game::state', gameState);
 
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
@@ -95,36 +100,43 @@ export class TatetiGateway
     @ConnectedSocket() socket: Socket,
   ): Promise<any> {
     const { roomId, playerId } = connectToGame;
+    try {
+      const gameState: Game = await this.tatetiService.playerEnterGameRoom(
+        connectToGame,
+      );
+      //asocia el socketId conectado con el PlayerId y su roomId
+      this.redis.hset(
+        this.connectedUsersKey,
+        socket.id,
+        JSON.stringify({ playerId, roomId }),
+      );
+      //se une el socket a la room
+      socket.join(roomId);
+      this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
 
-    const gameState = this.tatetiService.getGameRoomById(roomId);
-
-    if (!gameState) {
-      this.logger.warn('la room no existe');
-      return;
+      this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
+      return {
+        message: 'game room joined succesfuly',
+        ok: true,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      this.io.to(roomId).emit('exception', error.message);
+      return {
+        message: error.message,
+        ok: false,
+      };
     }
-
-    gameState.connect({ playerId, socketId: socket.id });
-
-    this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
-    socket.join(roomId);
-    //guarda a que room se conecto el user
-    await this.redis.hset(this.connectedUsersKey, socket.id, roomId);
-
-    this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
-    return {
-      message: 'ok',
-      ok: true,
-    };
   }
 
   @SubscribeMessage('room::game::move')
-  makeMove(
+  async makePlayerMove(
     @MessageBody() moveToGame: MoveToGameDto,
     @ConnectedSocket() socket: Socket,
-  ): any {
+  ): Promise<any> {
     const { roomId } = moveToGame;
     try {
-      const gameState: Game = this.tatetiService.moveToGame(moveToGame);
+      const gameState: Game = await this.tatetiService.moveToGame(moveToGame);
       this.logger.debug(
         `se hizo la jugada, este es el estado de la partida ${JSON.stringify(
           gameState.board,
@@ -146,13 +158,13 @@ export class TatetiGateway
   }
 
   @SubscribeMessage('room::game::play_again')
-  playAgain(
+  async playAgain(
     @MessageBody() playAgain: any,
     @ConnectedSocket() socket: Socket,
-  ): any {
+  ): Promise<any> {
     const { roomId, playerId } = playAgain;
     try {
-      const gameState: Game = this.tatetiService.playAgain(playAgain);
+      const gameState: Game = await this.tatetiService.playAgain(playAgain);
       this.logger.debug(
         `el jugador con id${playerId} quiere jugar de vuelta en la room ${roomId}`,
       );

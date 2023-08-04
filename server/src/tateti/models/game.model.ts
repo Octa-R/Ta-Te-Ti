@@ -237,36 +237,34 @@ export class Game {
     }
   }
 
-  connect({ socketId, playerId }) {
-    this.logger.debug(
-      `llego el playerId: ${playerId} con el socketid: ${socketId}`,
-    );
+  playerConnect({ playerId }) {
     if (this.player1 && playerId === this.player1?.id) {
       this.logger.debug(`se conecto player 1`);
-      this.player1.socketId = socketId;
+      this.player1.isConnected = true;
       return true;
     }
     if (this.player2 && playerId === this.player2?.id) {
+      this.player2.isConnected = true;
       this.logger.debug(`se conecto player 2`);
-      this.player2.socketId = socketId;
       return true;
     }
     this.logger.debug(`estado del game ${JSON.stringify(this)}`);
     return false;
   }
 
-  quit(socketId) {
-    // if (this.roomId !== roomId) {
-    //   return;
-    // }
-
-    if (socketId == this.player1.socketId) {
+  quit(playerId) {
+    if (this.player1 && playerId === this.player1?.id) {
       this.player1.isConnected = false;
+      this.logger.debug(`se desconecto player 1`);
+      return true;
     }
-
-    if (socketId == this.player2.socketId) {
+    if (this.player2 && playerId === this.player2?.id) {
       this.player2.isConnected = false;
+      this.logger.debug(`se desconecto player 2`);
+      return true;
     }
+    this.logger.debug(`estado del game ${JSON.stringify(this)}`);
+    return false;
   }
 
   isFull() {
