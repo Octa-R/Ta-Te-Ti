@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { Layout } from "../ui/Layout";
+import { Layout } from "../components/ui/Layout";
 import { Home } from "../pages/Home";
 import { Game } from "../pages/Game";
 import { CreateGame } from "../pages/CreateGame";

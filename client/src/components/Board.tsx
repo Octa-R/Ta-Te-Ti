@@ -1,8 +1,8 @@
 import { useRecoilValue } from "recoil";
 import { currentBoardState, currentPlayerData } from "../atoms";
 import { socket } from "../lib/socket.io-client";
-import { XMark } from "../ui/Xmark";
-import { OMark } from "../ui/OMark";
+import { XMark } from "./ui/icons/Xmark";
+import { OMark } from "./ui/icons/OMark";
 
 type SquareProps = {
   value: SquareValue;
@@ -13,12 +13,12 @@ type SquareProps = {
 const Square: React.FC<SquareProps> = ({ value, onSquareClick, position }) => {
   const activeSquare =
     value === " "
-      ? "transition duration-500 ease-in-out  hover:bg-blue-300"
+      ? "transition duration-500 ease-in-out hover:bg-blue-300"
       : " ";
   return (
     <button
       className={
-        "aspect-square rounded-sm h-28 border-solid bg-slate-300 flex justify-center items-center " +
+        "aspect-square rounded-sm h-20 bg-slate-200 border-none flex justify-center items-center " +
         activeSquare
       }
       onClick={() => onSquareClick({ value, position })}
@@ -53,7 +53,7 @@ export function Board() {
   const classes = [
     "grid grid-cols-3 grid-rows-3 content-center place-content-center place-items-center ",
     "rounded-sm aspect-square shadow-xl",
-    "border-0 w-96 bg-slate-500"
+    "border-0 w-72 bg-slate-500"
   ]
 
   return (

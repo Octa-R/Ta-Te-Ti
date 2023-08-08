@@ -1,13 +1,15 @@
-import Button from "../ui/Button";
+import { Button, Stack } from '@mantine/core';
 import { useNavigate } from "react-router-dom";
 
 export function Home() {
-
-
   const navigate = useNavigate();
+
   return (
-    <div className="flex bg-sky-700 flex-col w-full h-full items-center justify-center gap-4 p-4">
+    <Stack className='h-full w-full bg-sky-700' spacing="xl" justify='center' p={16}>
       <Button
+        size='xl'
+        variant="filled"
+        fullWidth
         onClick={() => {
           navigate("/create-game");
         }}
@@ -15,12 +17,15 @@ export function Home() {
         Crear nuevo juego
       </Button>
       <Button
+        size='xl'
+        variant="filled"
+        fullWidth
         onClick={() => {
           navigate("/join-game");
         }}
       >
         Unirse a un juego
       </Button>
-    </div>
+    </Stack>
   );
 }

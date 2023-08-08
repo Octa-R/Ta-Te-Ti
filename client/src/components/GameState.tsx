@@ -1,13 +1,21 @@
-import { currentOpponentGameState, currentPlayerGameState, currentGameStatus, currentRoomIdState, currentTurn, currentPlayerData, currentMatchResult } from "../atoms";
+import {
+  currentOpponentGameState,
+  currentPlayerGameState,
+  currentGameStatus,
+  currentRoomIdState,
+  currentTurn,
+  currentPlayerData,
+  currentMatchResult
+} from "../atoms";
 import { useRecoilValue } from "recoil";
-import { XMark } from "../ui/Xmark";
-import { OMark } from "../ui/OMark";
-import { ReactComponent as CopyIcon } from "../icons/copy-icon.svg"
-import { ReactComponent as CheckIcon } from "../icons/check-icon.svg"
-import { useCopyToClipboard } from 'usehooks-ts'
-import React, { useEffect, useState } from "react"
-import { ConnectionState } from "../ui/ConnectionState";
+import { XMark } from "./ui/icons/Xmark";
+import { OMark } from "./ui/icons/OMark";
+import React, { useEffect } from "react"
+import { ConnectionState } from "./ui/ConnectionState";
 import { socket } from "../lib/socket.io-client";
+import { CopyButton, Tooltip, ActionIcon, Code } from "@mantine/core";
+import { IconCheck } from "./ui/icons/IconCheck";
+import { IconCopy } from "./ui/icons/IconCopy";
 
 type PlayerStateProps = {
   name: string;
@@ -25,36 +33,30 @@ export const PlayerState: React.FC<PlayerStateProps> = ({ name, isConnected, sco
   );
 };
 
-type Props = {
+type RoomIdStateProps = {
   roomId: string
 }
 
-export const RoomIdState: React.FC<Props> = ({ roomId }) => {
-  const [value, copy] = useCopyToClipboard()
-  const [hasCopiedText, setHasCopiedText] = useState(Boolean(value))
+export const RoomIdState: React.FC<RoomIdStateProps> = ({ roomId }) => {
 
   return (
     <article className="bg-slate-200 rounded-sm font-bold flex py-1 justify-start items-center px-4 gap-4">
       <div className="h-2 w-2 "></div>
       <label>Room-ID:</label>
       <div className="flex rounded-md border-2 grow-1 ml-auto">
-        <div className="bg-slate-100 text-black rounded pl-2 align-middle border border-slate-600 flex flex-row gap-1 justify-between grow-1">
-          {roomId}
-          <button
-            disabled={hasCopiedText}
-            className="link"
-            onClick={() => {
-              copy(roomId)
-              setHasCopiedText(true)
-              setTimeout(() => {
-                setHasCopiedText(false)
-              }, 3000)
-            }}
-          >
-            <div className="bg-slate-500  rounded-e">
-              {hasCopiedText ? <CheckIcon /> : <CopyIcon />}
-            </div>
-          </button>
+        <div className="bg-slate-300 text-black rounded align-middle border border-slate-600 flex flex-row  justify-between grow-1">
+          <Code fz={16} className="bg-slate-300">
+            {roomId}
+          </Code>
+          <CopyButton value={roomId} timeout={2000}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
+                <ActionIcon color={copied ? 'teal' : 'gray'} onClick={copy}>
+                  {copied ? <IconCheck /> : <IconCopy />}
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </CopyButton>
         </div>
       </div>
     </article>
@@ -100,7 +102,6 @@ export const GameState: React.FC<any> = ({ }) => {
           default:
             return "Error"
         }
-
       default:
         return param;
     }
