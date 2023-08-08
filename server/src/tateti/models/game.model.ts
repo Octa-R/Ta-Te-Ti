@@ -72,9 +72,8 @@ export class Game {
     return this.player2;
   }
 
-  getPlayerById(playerId: string) {
+  getPlayerById(playerId: string): Player {
     if (playerId === this.player1?.id) {
-      this.logger.debug(`se devolvera player 1}`);
       return this.player1;
     }
     if (playerId === this.player2?.id) {
@@ -164,16 +163,16 @@ export class Game {
     }
 
     this.turns++;
-    this.logger.debug(`turns: ${this.turns}`);
+    this.logger.debug(`id${this.roomId} turns: ${this.turns}`);
 
     if (this.turns >= 5) {
-      //chequear si hay o no un ganador
       const [isGameOver, winner] = this.checkWinner();
 
       if (isGameOver) {
         this.status = 'GAME_OVER';
-        this.logger.log(`el juego termino winner: ${winner}`);
+
         if (winner) {
+          this.logger.log(`el juego termino, winner: ${winner}`);
           if (winner === 'X') {
             this.matchResult = 'X_WINS';
           }
@@ -181,12 +180,13 @@ export class Game {
             this.matchResult = 'O_WINS';
           }
         }
+
         if (this.player1.mark === winner) {
           this.player1.incrementScore();
         } else if (this.player2.mark === winner) {
           this.player2.incrementScore();
         } else if (!winner) {
-          this.logger.log('empate o TIE');
+          this.logger.log('el juego termino, hay empate o TIE');
           this.matchResult = 'TIE';
         }
       } else {
@@ -212,7 +212,6 @@ export class Game {
         return [true, this.board[0][col]];
       }
     }
-
     // Chequear diagonales
     if (
       this.board[0][0] === this.board[1][1] &&
@@ -231,7 +230,7 @@ export class Game {
     }
 
     if (this.turns === 9) {
-      return [true, 'TIE'];
+      return [true, null];
     } else {
       return [false, null];
     }

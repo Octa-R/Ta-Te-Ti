@@ -138,9 +138,7 @@ export class TatetiGateway
     try {
       const gameState: Game = await this.tatetiService.moveToGame(moveToGame);
       this.logger.debug(
-        `se hizo la jugada, este es el estado de la partida ${JSON.stringify(
-          gameState.board,
-        )}`,
+        `nuevo estado de la partida ${JSON.stringify(gameState.board)}`,
       );
       this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
       return {
