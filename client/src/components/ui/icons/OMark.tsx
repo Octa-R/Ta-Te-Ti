@@ -6,7 +6,7 @@ export function OMark({ size }: any) {
     if (size === "sm") {
         sizeClass = "w-4 h-4"; // Tamaño pequeño
     } else if (size === "lg") {
-        sizeClass = "p-4"; // Tamaño grande
+        sizeClass = "p-2"; // Tamaño grande
     }
 
     return (
@@ -20,7 +20,7 @@ export function OMark({ size }: any) {
                 className="stroke-red-500"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={3.8}
+                strokeWidth={3.9}
                 fill="current-color"
             >
             </path>

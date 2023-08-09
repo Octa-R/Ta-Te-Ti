@@ -96,9 +96,9 @@ export const GameState: React.FC<any> = ({ }) => {
           case "TIE":
             return "Empate"
           case "X_WINS":
-            return "Gana X"
+            return (<> Winner: {<XMark size="sm" />}</>)
           case "O_WINS":
-            return "Gana O"
+            return (<> Winner: {<OMark size="sm" />}</>)
           default:
             return "Error"
         }

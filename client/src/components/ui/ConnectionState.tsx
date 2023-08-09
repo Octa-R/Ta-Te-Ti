@@ -3,6 +3,11 @@ type Props = {
 };
 
 export const ConnectionState: React.FC<Props> = ({ isConnected }) => (
-  <div className={`w-2 h-2 p-1 rounded-full border border-black ${isConnected ? 'bg-green-600' : 'bg-red-600'}`} />
+  <div
+    className={`w-2 h-2 p-1 rounded-full border-black 
+    ${isConnected ?
+        'bg-green-600' :
+        'bg-red-600'}`
+    } />
 )
 
