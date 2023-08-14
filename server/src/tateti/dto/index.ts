@@ -9,10 +9,3 @@ export interface GameStateDto {
   turn: MARK;
   matchResult: MATCH_RESULT;
 }
-
-export interface PlayerStateDto {
-  name: string;
-  mark: MARK;
-  score: number;
-  isConnected: boolean;
-}

@@ -1,0 +1,233 @@
+{
+  "namespaces": [
+    "public"
+  ],
+  "name": "public",
+  "tables": [
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "mark": {
+          "name": "mark",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "score": {
+          "name": "score",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "0",
+          "mappedType": "integer"
+        },
+        "is_connected": {
+          "name": "is_connected",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "player",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "player_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "turn_count": {
+          "name": "turn_count",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "0",
+          "mappedType": "integer"
+        },
+        "player1wants_to_play_again": {
+          "name": "player1wants_to_play_again",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "player2wants_to_play_again": {
+          "name": "player2wants_to_play_again",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "player1_id": {
+          "name": "player1_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "player2_id": {
+          "name": "player2_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "string"
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'WAITING_OPPONENT'",
+          "mappedType": "string"
+        },
+        "turn": {
+          "name": "turn",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'X'",
+          "mappedType": "string"
+        },
+        "board": {
+          "name": "board",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "json"
+        },
+        "match_result": {
+          "name": "match_result",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'NOT_OVER'",
+          "mappedType": "string"
+        }
+      },
+      "name": "game",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "player1_id"
+          ],
+          "composite": false,
+          "keyName": "game_player1_id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "player2_id"
+          ],
+          "composite": false,
+          "keyName": "game_player2_id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "game_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "game_player1_id_foreign": {
+          "constraintName": "game_player1_id_foreign",
+          "columnNames": [
+            "player1_id"
+          ],
+          "localTableName": "public.game",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.player",
+          "updateRule": "cascade"
+        },
+        "game_player2_id_foreign": {
+          "constraintName": "game_player2_id_foreign",
+          "columnNames": [
+            "player2_id"
+          ],
+          "localTableName": "public.game",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.player",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      }
+    }
+  ]
+}

@@ -7,26 +7,17 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
-  WsResponse,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import {
-  Inject,
-  Logger,
-  UseFilters,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Inject, Logger, UseFilters } from '@nestjs/common';
 import { ValidationExceptionFilter } from './exceptions/exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { GameSocket } from './interfaces';
 import { instanceToPlain } from 'class-transformer';
 import { Namespace } from 'socket.io';
 import { TatetiService } from './tateti.service';
-import { JoinGameRoomDto } from './dto/join-game-room.dto';
 import { Redis } from 'ioredis';
-import { Game } from './models/game.model';
+import { Game } from './entities/game.entity';
 import { ConnectToGameDto } from './dto/connectToGame.dto';
 /*
 este gateway devuelve el estado del juego ante cualquier cambio
@@ -35,7 +26,6 @@ hay que tener las credenciales necesarias
 usando el mensaje join el servidor nos va a unir a la game room
 */
 @UseFilters(new ValidationExceptionFilter())
-// @UsePipes(new ValidationPipe())
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -49,7 +39,11 @@ export class TatetiGateway
   io: Namespace;
   private readonly logger = new Logger(TatetiGateway.name);
 
-  connectedUsersKey = 'connected_users';
+  roomsConnections = 'rooms_connections';
+  connectedSockets = 'connected_sockets';
+  connectedPlayers = 'connected_players';
+  gameRoomsKey = 'game_rooms';
+  gameState = 'game_state';
 
   constructor(
     @Inject('REDIS') private redis: Redis,
@@ -68,18 +62,18 @@ export class TatetiGateway
   async handleDisconnect(socket: GameSocket) {
     this.logger.log(`Disconnected socket with id: ${socket.id}`);
 
-    const data = await this.redis.hget(this.connectedUsersKey, socket.id);
-    if (!data) {
+    const roomId = await this.redis.hget(this.connectedSockets, socket.id);
+    if (!roomId) {
       this.logger.error('no se encontro la room para ese socket');
       return;
     }
-    const { roomId, playerId } = JSON.parse(data);
-
-    this.logger.debug(`el socket se desconecto de la room`, roomId, playerId);
+    this.logger.debug(`el socket se desconecto de la room`, roomId);
+    const playerId = await this.redis.hget(this.connectedPlayers, socket.id);
+    this.logger.debug(`el player con id`, playerId);
     if (!roomId || !playerId) {
       this.logger.debug('se rompio, no hay player ni roomId');
     }
-    await this.redis.hdel(this.connectedUsersKey, socket.id);
+    // await this.redis.hset(this.connectedSockets, socket.id);
     const game = await this.tatetiService.playerDisconnect({
       roomId,
       playerId,
@@ -89,6 +83,15 @@ export class TatetiGateway
     this.io.to(roomId).emit('room::game::state', gameState);
 
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
+  }
+
+  removeConnectionToRoom(socket) {}
+
+  addConnectionToRoom(socket, roomId) {
+    //asocia el socketId a su roomId
+    this.redis.hset(this.connectedSockets, socket.id, roomId);
+    socket.join(roomId);
+    this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
   }
 
   // este mensaje se manda para que socket.io conecte el jugador a la room
@@ -101,20 +104,9 @@ export class TatetiGateway
   ): Promise<any> {
     const { roomId, playerId } = connectToGame;
     try {
-      const gameState: Game = await this.tatetiService.playerEnterGameRoom(
-        connectToGame,
-      );
-      //asocia el socketId conectado con el PlayerId y su roomId
-      this.redis.hset(
-        this.connectedUsersKey,
-        socket.id,
-        JSON.stringify({ playerId, roomId }),
-      );
-      //se une el socket a la room
-      socket.join(roomId);
-      this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
-
-      this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
+      const game = await this.tatetiService.playerEnterGameRoom(connectToGame);
+      // this.addConnectionToRoom(socket, roomId);
+      this.io.to(roomId).emit('room::game::state', instanceToPlain(game));
       return {
         message: 'game room joined succesfuly',
         ok: true,

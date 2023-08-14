@@ -1,51 +1,55 @@
 import { Logger } from '@nestjs/common';
-import { GameStateDto } from '../dto';
-import { CurrentGameState } from '../interfaces';
-import { Player } from './player.model';
 import { Exclude, Type } from 'class-transformer';
 
-export class Game {
-  @Exclude()
-  id: string;
-  @Exclude()
-  turns: number;
-  @Exclude()
+import {
+  BaseEntity,
+  Entity,
+  OneToOne,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
+import { randomUUID } from 'crypto';
+import { Player } from './player.entity';
+@Entity()
+export class Game extends BaseEntity<Game, 'id'> {
+  @PrimaryKey({ type: 'uuid', hidden: true })
+  id: string = randomUUID();
+  @Property({ hidden: true })
+  turnCount: number = 0;
+  @Property({ hidden: true })
   player1WantsToPlayAgain: boolean;
-  @Exclude()
+  @Property({ hidden: true })
   player2WantsToPlayAgain: boolean;
-
-  @Type(() => Player)
-  private player1: Player;
-  @Type(() => Player)
-  private player2: Player;
-
-  roomId: string;
-  status: GAME_STATUS;
-  turn: MARK;
+  @OneToOne()
+  player1: Player;
+  @OneToOne({ nullable: true })
+  player2?: Player;
+  @Property()
+  status: GAME_STATUS = 'WAITING_OPPONENT';
+  @Property()
+  turn: MARK = 'X';
+  @Property({ type: 'json' })
   board: VALUE[][];
+  @Property()
   matchResult: MATCH_RESULT;
-
   @Exclude()
   private readonly logger = new Logger(Game.name);
 
   constructor(partial: Partial<Game>) {
-    Object.assign(this, partial);
-    this.status = 'WAITING_OPPONENT';
-    this.turn = 'X';
-    this.turns = 0;
+    super();
+    this.player2WantsToPlayAgain = false;
+    this.player1WantsToPlayAgain = false;
+    this.matchResult = 'NOT_OVER';
     this.board = [
       [' ', ' ', ' '],
       [' ', ' ', ' '],
       [' ', ' ', ' '],
     ];
+    Object.assign(this, partial);
   }
 
-  getRoomId() {
-    return this.roomId;
-  }
-
-  setPlayer1(player: Partial<Player>): Player {
-    this.player1 = new Player(player);
+  setPlayer1(player: Player): Player {
+    this.player1 = player;
     return this.player1;
   }
 
@@ -58,18 +62,29 @@ export class Game {
     }
   }
 
-  setPlayer2(player: Partial<Player>): Player {
+  setPlayer2(player: Player): Player {
     if (this.isFull()) {
       throw new Error('la room esta llena');
     }
-    this.player2 = new Player(player);
-    if ((this.player1.mark = 'X')) {
+    this.player2 = player;
+    this.logger.debug(`mark del p1 ${this.player1.mark}`);
+
+    if (this.player1.mark === 'X') {
       this.player2.mark = 'O';
     } else {
       this.player2.mark = 'X';
     }
+    this.logger.debug(`mark del p2 ${this.player2.mark}`);
     this.status = 'PLAYING';
     return this.player2;
+  }
+
+  getPlayer1Id() {
+    return this.player1.id;
+  }
+
+  getPlayer2Id() {
+    return this.player2.id;
   }
 
   getPlayerById(playerId: string): Player {
@@ -109,7 +124,7 @@ export class Game {
       [' ', ' ', ' '],
     ];
     this.turn = 'X';
-    this.turns = 0;
+    this.turnCount = 0;
     this.status = 'PLAYING';
   }
 
@@ -162,10 +177,9 @@ export class Game {
       this.turn = 'O';
     }
 
-    this.turns++;
-    this.logger.debug(`id${this.roomId} turns: ${this.turns}`);
+    this.turnCount++;
 
-    if (this.turns >= 5) {
+    if (this.turnCount >= 5) {
       const [isGameOver, winner] = this.checkWinner();
 
       if (isGameOver) {
@@ -229,7 +243,7 @@ export class Game {
       return [true, this.board[0][2]];
     }
 
-    if (this.turns === 9) {
+    if (this.turnCount === 9) {
       return [true, null];
     } else {
       return [false, null];

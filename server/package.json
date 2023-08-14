@@ -19,7 +19,20 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ]
+  },
   "dependencies": {
+    "@mikro-orm/cli": "^5.7.14",
+    "@mikro-orm/core": "^5.7.14",
+    "@mikro-orm/migrations": "^5.7.14",
+    "@mikro-orm/nestjs": "^5.2.0",
+    "@mikro-orm/postgresql": "^5.7.14",
+    "@mikro-orm/reflection": "^5.7.14",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/microservices": "^10.1.2",
@@ -32,6 +45,7 @@
     "ioredis": "^5.3.2",
     "nanoid": "^4.0.2",
     "randomstring": "^1.3.0",
+    "redis": "^4.6.7",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.0"

@@ -1,10 +1,4 @@
-import {
-  IsBoolean,
-  IsOptional,
-  IsString,
-  IsUUID,
-  isString,
-} from 'class-validator';
+import { IsBoolean, IsString, IsUUID } from 'class-validator';
 import { isMark } from '../decorators/is-mark.decorator';
 
 export class NewPlayerDataDto {
