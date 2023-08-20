@@ -19,8 +19,16 @@ export class Player extends BaseEntity<Player, 'id'> {
     super();
     this.id = randomUUID();
     this.score = 0;
-    this.isConnected = true;
+    this.isConnected = false;
     Object.assign(this, partial);
+  }
+
+  connect() {
+    this.isConnected = true;
+  }
+
+  disconnect() {
+    this.isConnected = false;
   }
 
   getId() {

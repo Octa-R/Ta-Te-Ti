@@ -19,6 +19,7 @@ import { TatetiService } from './tateti.service';
 import { Redis } from 'ioredis';
 import { Game } from './entities/game.entity';
 import { ConnectToGameDto } from './dto/connectToGame.dto';
+import { ConnectionsService } from './services/connections.service';
 /*
 este gateway devuelve el estado del juego ante cualquier cambio
 para poder unirse a una gameroom
@@ -39,15 +40,9 @@ export class TatetiGateway
   io: Namespace;
   private readonly logger = new Logger(TatetiGateway.name);
 
-  roomsConnections = 'rooms_connections';
-  connectedSockets = 'connected_sockets';
-  connectedPlayers = 'connected_players';
-  gameRoomsKey = 'game_rooms';
-  gameState = 'game_state';
-
   constructor(
-    @Inject('REDIS') private redis: Redis,
-    private tatetiService: TatetiService,
+    private gameService: TatetiService,
+    private conn: ConnectionsService,
   ) {}
 
   afterInit(): void {
@@ -61,52 +56,49 @@ export class TatetiGateway
 
   async handleDisconnect(socket: GameSocket) {
     this.logger.log(`Disconnected socket with id: ${socket.id}`);
-
-    const roomId = await this.redis.hget(this.connectedSockets, socket.id);
-    if (!roomId) {
-      this.logger.error('no se encontro la room para ese socket');
-      return;
+    try {
+      const roomId = await this.conn.getRoomIdBySocket(socket.id);
+      const playerId = await this.conn.getPlayerIdBySocket(socket.id);
+      const gameId = await this.conn.getGameIdByRoom(roomId);
+      // this.logger.debug(`socket ${socket.id} se desconecto de room ${roomId}`);
+      // this.logger.debug(`el player ${playerId} se desconecto del game ${gameId}`);
+      await this.conn.disconnetSocketFromRoom(socket, roomId);
+      this.logger.debug('se desconecto el socket');
+      const game = await this.gameService.playerDisconnect({
+        gameId,
+        playerId,
+      });
+      this.io.to(roomId).emit('room::game::state', game);
+    } catch (error) {
+      this.logger.error(error.message || 'unknown error');
     }
-    this.logger.debug(`el socket se desconecto de la room`, roomId);
-    const playerId = await this.redis.hget(this.connectedPlayers, socket.id);
-    this.logger.debug(`el player con id`, playerId);
-    if (!roomId || !playerId) {
-      this.logger.debug('se rompio, no hay player ni roomId');
-    }
-    // await this.redis.hset(this.connectedSockets, socket.id);
-    const game = await this.tatetiService.playerDisconnect({
-      roomId,
-      playerId,
-    });
-    const gameState = instanceToPlain(game);
-    this.logger.debug(`se va a enviar esto ${JSON.stringify(gameState)}`);
-    this.io.to(roomId).emit('room::game::state', gameState);
-
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
 
-  removeConnectionToRoom(socket) {}
-
-  addConnectionToRoom(socket, roomId) {
-    //asocia el socketId a su roomId
-    this.redis.hset(this.connectedSockets, socket.id, roomId);
-    socket.join(roomId);
-    this.logger.debug(`se une el socket ${socket.id} a la room ${roomId}`);
-  }
-
-  // este mensaje se manda para que socket.io conecte el jugador a la room
-  // antes cad jugador debe haber obtenido sus credenciales
-  // en los endpoints http
+  /*
+    este mensaje se manda para que socket.io conecte el jugador a la room
+    la game_room tiene que haberse creado previamente
+    y el jugador 2 se tiene que haber unido 
+    usando los endpoints http
+  */
   @SubscribeMessage('room::game::join')
   async connectToGame(
     @MessageBody() connectToGame: ConnectToGameDto,
     @ConnectedSocket() socket: Socket,
   ): Promise<any> {
+    this.logger.debug('entro al game join evt');
     const { roomId, playerId } = connectToGame;
     try {
-      const game = await this.tatetiService.playerEnterGameRoom(connectToGame);
-      // this.addConnectionToRoom(socket, roomId);
-      this.io.to(roomId).emit('room::game::state', instanceToPlain(game));
+      const gameId = await this.conn.getGameIdByRoom(roomId);
+      // nos unimos al juego
+      const game = await this.gameService.playerEnterGameRoom({
+        playerId,
+        gameId,
+      });
+      this.logger.debug('estado del juego que se manda', JSON.stringify(game));
+      // nos conectamos con redis
+      await this.conn.addConnectionToRoom(socket, roomId);
+      this.io.to(roomId).emit('room::game::state', game);
       return {
         message: 'game room joined succesfuly',
         ok: true,
@@ -122,17 +114,15 @@ export class TatetiGateway
   }
 
   @SubscribeMessage('room::game::move')
-  async makePlayerMove(
-    @MessageBody() moveToGame: MoveToGameDto,
-    @ConnectedSocket() socket: Socket,
-  ): Promise<any> {
+  async makePlayerMove(@MessageBody() moveToGame: MoveToGameDto): Promise<any> {
     const { roomId } = moveToGame;
     try {
-      const gameState: Game = await this.tatetiService.moveToGame(moveToGame);
-      this.logger.debug(
-        `nuevo estado de la partida ${JSON.stringify(gameState.board)}`,
-      );
-      this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
+      const gameId = await this.conn.getGameIdByRoom(roomId);
+      const game: Game = await this.gameService.moveToGame({
+        ...moveToGame,
+        gameId,
+      });
+      this.io.to(roomId).emit('room::game::state', game);
       return {
         message: 'played succesfully',
         ok: true,
@@ -148,16 +138,14 @@ export class TatetiGateway
   }
 
   @SubscribeMessage('room::game::play_again')
-  async playAgain(
-    @MessageBody() playAgain: any,
-    @ConnectedSocket() socket: Socket,
-  ): Promise<any> {
+  async playAgain(@MessageBody() playAgain: any): Promise<any> {
     const { roomId, playerId } = playAgain;
     try {
-      const gameState: Game = await this.tatetiService.playAgain(playAgain);
-      this.logger.debug(
-        `el jugador con id${playerId} quiere jugar de vuelta en la room ${roomId}`,
-      );
+      const gameId = await this.conn.getGameIdByRoom(roomId);
+      const gameState: Game = await this.gameService.playAgain({
+        playerId,
+        gameId,
+      });
       this.io.to(roomId).emit('room::game::state', instanceToPlain(gameState));
       return {
         message: 'play again',

@@ -1,6 +1,5 @@
 import { Logger } from '@nestjs/common';
 import { Exclude, Type } from 'class-transformer';
-
 import {
   BaseEntity,
   Entity,
@@ -10,6 +9,7 @@ import {
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { Player } from './player.entity';
+
 @Entity()
 export class Game extends BaseEntity<Game, 'id'> {
   @PrimaryKey({ type: 'uuid', hidden: true })
@@ -32,8 +32,8 @@ export class Game extends BaseEntity<Game, 'id'> {
   board: VALUE[][];
   @Property()
   matchResult: MATCH_RESULT;
-  @Exclude()
-  private readonly logger = new Logger(Game.name);
+  // @Exclude()
+  // private readonly logger: Logger;
 
   constructor(partial: Partial<Game>) {
     super();
@@ -53,68 +53,19 @@ export class Game extends BaseEntity<Game, 'id'> {
     return this.player1;
   }
 
-  playerIsHost(playerId: string) {
-    if (this.player1.id === playerId) {
-      return true;
-    }
-    if (this.player2.id === playerId) {
-      return false;
-    }
-  }
-
   setPlayer2(player: Player): Player {
     if (this.isFull()) {
       throw new Error('la room esta llena');
     }
     this.player2 = player;
-    this.logger.debug(`mark del p1 ${this.player1.mark}`);
 
     if (this.player1.mark === 'X') {
       this.player2.mark = 'O';
     } else {
       this.player2.mark = 'X';
     }
-    this.logger.debug(`mark del p2 ${this.player2.mark}`);
     this.status = 'PLAYING';
     return this.player2;
-  }
-
-  getPlayer1Id() {
-    return this.player1.id;
-  }
-
-  getPlayer2Id() {
-    return this.player2.id;
-  }
-
-  getPlayerById(playerId: string): Player {
-    if (playerId === this.player1?.id) {
-      return this.player1;
-    }
-    if (playerId === this.player2?.id) {
-      return this.player2;
-    }
-    return null;
-  }
-
-  setPlayerWantsToPlayAgain(data) {
-    const player = this.getPlayerById(data.playerId);
-    if (!player) {
-      throw new Error();
-    }
-
-    if (this.playerIsHost(player.id)) {
-      this.player1WantsToPlayAgain = true;
-    } else {
-      this.player2WantsToPlayAgain = true;
-    }
-
-    if (this.player1WantsToPlayAgain && this.player2WantsToPlayAgain) {
-      this.resetGame();
-      return true;
-    } else {
-      return false;
-    }
   }
 
   private resetGame(): void {
@@ -128,9 +79,39 @@ export class Game extends BaseEntity<Game, 'id'> {
     this.status = 'PLAYING';
   }
 
-  move({ row, col, mark, playerId }) {
+  getPlayerById(playerId: string): Player {
+    if (playerId === this.player1?.id) {
+      return this.player1;
+    }
+    if (playerId === this.player2?.id) {
+      return this.player2;
+    }
+    return null;
+  }
+
+  setPlayerWantsToPlayAgain({ playerId }) {
+    const player = this.getPlayerById(playerId);
+    if (!player) {
+      throw new Error();
+    }
+
+    if ((this.player1.id = player.id)) {
+      this.player1WantsToPlayAgain = true;
+    } else {
+      this.player2WantsToPlayAgain = true;
+    }
+
+    if (this.player1WantsToPlayAgain && this.player2WantsToPlayAgain) {
+      this.resetGame();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  playerMakeMove({ row, col, mark, playerId }) {
     if (this.status === 'WAITING_OPPONENT') {
-      this.logger.log(
+      console.log(
         'la partida no puede empezar hasta que se conecte el otro jugador',
       );
       throw new Error(
@@ -139,19 +120,18 @@ export class Game extends BaseEntity<Game, 'id'> {
     }
 
     if (this.status === 'GAME_OVER') {
-      console.log('la partida termino');
       throw new Error('la partida termino');
     }
 
     if (this.board[row][col] !== ' ') {
-      this.logger.log('el cuadrado esta ocupado');
+      console.log('el cuadrado esta ocupado');
       throw new Error('el cuadrado esta ocupado');
     }
 
     const player = this.getPlayerById(playerId);
 
     if (!player) {
-      this.logger.log('el jugador no pertenece a la partida');
+      console.log('el jugador no pertenece a la partida');
       throw new Error('el jugador no pertenece a la partida');
     }
 
@@ -161,7 +141,7 @@ export class Game extends BaseEntity<Game, 'id'> {
       this.turn !== mark ||
       player.mark !== mark
     ) {
-      this.logger.log('no es el turno del jugador');
+      console.log('no es el turno del jugador');
       throw new Error('no es el turno del jugador');
     }
 
@@ -186,7 +166,6 @@ export class Game extends BaseEntity<Game, 'id'> {
         this.status = 'GAME_OVER';
 
         if (winner) {
-          this.logger.log(`el juego termino, winner: ${winner}`);
           if (winner === 'X') {
             this.matchResult = 'X_WINS';
           }
@@ -200,11 +179,8 @@ export class Game extends BaseEntity<Game, 'id'> {
         } else if (this.player2.mark === winner) {
           this.player2.incrementScore();
         } else if (!winner) {
-          this.logger.log('el juego termino, hay empate o TIE');
           this.matchResult = 'TIE';
         }
-      } else {
-        this.logger.log('el juego todavia no termino');
       }
     }
   }
@@ -251,32 +227,22 @@ export class Game extends BaseEntity<Game, 'id'> {
   }
 
   playerConnect({ playerId }) {
-    if (this.player1 && playerId === this.player1?.id) {
-      this.logger.debug(`se conecto player 1`);
-      this.player1.isConnected = true;
+    console.log('playerConnect');
+
+    const player = this.getPlayerById(playerId);
+    if (player) {
+      player.connect();
       return true;
     }
-    if (this.player2 && playerId === this.player2?.id) {
-      this.player2.isConnected = true;
-      this.logger.debug(`se conecto player 2`);
-      return true;
-    }
-    this.logger.debug(`estado del game ${JSON.stringify(this)}`);
     return false;
   }
 
-  quit(playerId) {
-    if (this.player1 && playerId === this.player1?.id) {
-      this.player1.isConnected = false;
-      this.logger.debug(`se desconecto player 1`);
+  playerDisconnect(playerId) {
+    const player = this.getPlayerById(playerId);
+    if (player) {
+      player.disconnect();
       return true;
     }
-    if (this.player2 && playerId === this.player2?.id) {
-      this.player2.isConnected = false;
-      this.logger.debug(`se desconecto player 2`);
-      return true;
-    }
-    this.logger.debug(`estado del game ${JSON.stringify(this)}`);
     return false;
   }
 

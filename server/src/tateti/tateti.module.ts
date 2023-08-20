@@ -6,10 +6,11 @@ import { TatetiService } from './tateti.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Player } from './entities/player.entity';
 import { Game } from './entities/game.entity';
+import { ConnectionsService } from './services/connections.service';
 
 @Module({
   imports: [RedisModule, MikroOrmModule.forFeature([Game, Player])],
   controllers: [TatetiController],
-  providers: [TatetiGateway, TatetiService],
+  providers: [TatetiGateway, TatetiService, ConnectionsService],
 })
 export class TatetiModule {}
