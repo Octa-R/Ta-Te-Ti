@@ -14,6 +14,11 @@ interface PlayerData {
   isHost: boolean;
 }
 
+export const currentRoomIdState = atom({
+  key: "currentRoomIdState",
+  default: "NONE",
+});
+
 export const currentPlayerIdState = selector({
   key: "currentPlayerIdState",
   get: ({ get }) => {
@@ -33,7 +38,6 @@ export const currentGameState = atom<CurrentGameState>({
     player1: { name: "", score: 0, isConnected: false },
     player2: { name: "", score: 0, isConnected: false },
     status: "WAITING_OPPONENT",
-    roomId: "NONE",
     turn: "X",
     matchResult: "",
   },
@@ -83,13 +87,6 @@ export const currentOpponentGameState = selector({
         ...state.player1,
       };
     }
-  },
-});
-
-export const currentRoomIdState = selector({
-  key: "currentRoomIdState",
-  get: ({ get }) => {
-    return get(currentGameState).roomId;
   },
 });
 

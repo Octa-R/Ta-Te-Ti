@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { Button, Stack, TextInput } from "@mantine/core"
 import { useSetRecoilState } from "recoil";
-import { currentPlayerData } from "../atoms";
+import { currentPlayerData, currentRoomIdState } from "../atoms";
 import { useState } from "react";
 
 export function JoinGame() {
   const navigate = useNavigate();
-  const setCurrentPlayerData = useSetRecoilState(currentPlayerData)
   const [roomId, setRoomId] = useState("")
   const [playerName, setPlayerName] = useState("anon")
+  const setCurrentPlayerData = useSetRecoilState(currentPlayerData)
+  const setCurrentRoomId = useSetRecoilState(currentRoomIdState)
 
   const handleClick = () => {
     const fetchData = async () => {
@@ -26,7 +27,9 @@ export function JoinGame() {
         throw new Error(errorData.message || "Error de servidor desconocido");
       }
       const json = await res.json()
+      console.log("json del post", json)
       setCurrentPlayerData(json)
+      setCurrentRoomId(json.roomId)
     }
 
     fetchData()

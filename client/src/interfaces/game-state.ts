@@ -5,7 +5,6 @@ export interface CurrentGameState {
   player1: PlayerGameState;
   player2: PlayerGameState;
   status: string;
-  roomId: string;
   turn: string;
   matchResult: string;
 }
