@@ -90,15 +90,12 @@ export class Game extends BaseEntity<Game, 'id'> {
   }
 
   setPlayerWantsToPlayAgain({ playerId }) {
-    const player = this.getPlayerById(playerId);
-    if (!player) {
-      throw new Error();
-    }
-
-    if ((this.player1.id = player.id)) {
+    if (this.player1.id === playerId) {
       this.player1WantsToPlayAgain = true;
-    } else {
+    } else if (this.player2.id === playerId) {
       this.player2WantsToPlayAgain = true;
+    } else {
+      throw new Error('player not found');
     }
 
     if (this.player1WantsToPlayAgain && this.player2WantsToPlayAgain) {
@@ -111,9 +108,6 @@ export class Game extends BaseEntity<Game, 'id'> {
 
   playerMakeMove({ row, col, mark, playerId }) {
     if (this.status === 'WAITING_OPPONENT') {
-      console.log(
-        'la partida no puede empezar hasta que se conecte el otro jugador',
-      );
       throw new Error(
         'la partida no puede empezar hasta que se conecte el otro jugador',
       );
@@ -124,14 +118,12 @@ export class Game extends BaseEntity<Game, 'id'> {
     }
 
     if (this.board[row][col] !== ' ') {
-      console.log('el cuadrado esta ocupado');
       throw new Error('el cuadrado esta ocupado');
     }
 
     const player = this.getPlayerById(playerId);
 
     if (!player) {
-      console.log('el jugador no pertenece a la partida');
       throw new Error('el jugador no pertenece a la partida');
     }
 
@@ -141,7 +133,6 @@ export class Game extends BaseEntity<Game, 'id'> {
       this.turn !== mark ||
       player.mark !== mark
     ) {
-      console.log('no es el turno del jugador');
       throw new Error('no es el turno del jugador');
     }
 
@@ -227,8 +218,6 @@ export class Game extends BaseEntity<Game, 'id'> {
   }
 
   playerConnect({ playerId }) {
-    console.log('playerConnect');
-
     const player = this.getPlayerById(playerId);
     if (player) {
       player.connect();

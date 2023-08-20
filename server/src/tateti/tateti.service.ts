@@ -27,12 +27,10 @@ export class TatetiService {
 
   //este metodo crea la room, y devuelve las credenciales al host
   async createGameRoom({ name, mark }): Promise<NewPlayerDataDto> {
-    this.logger.debug('se entro a createGameRoom', name, mark);
     const newGame = new Game({});
     const roomId = await this.conn.createRoom(newGame.id);
     const player1 = new Player({ name, mark });
     newGame.setPlayer1(player1);
-    this.logger.log(`se creo un nuevo gameroom ${newGame.id}, ${roomId}`);
     this.em.persistAndFlush(newGame);
     return {
       message: `room with id: ${roomId} created`,
@@ -48,33 +46,22 @@ export class TatetiService {
 esta funcion la usa el player 2 para unirse a la room creada, y obtener sus credenciales
 */
   async joinGameRoom({ gameId, name, roomId }): Promise<NewPlayerDataDto> {
-    this.logger.debug(`joingameroom gameid:${gameId} roomid${roomId}`);
     const game = await this.gameRepo.findOneOrFail(
       { id: gameId },
       { populate: ['player1', 'player2'] },
     );
-    this.logger.log(`game en joinGameRoom ${JSON.stringify(game)}`);
 
     if (!game) {
-      this.logger.error(`room with id: ${gameId} not found`);
       throw new Error(`room with id: ${gameId} not found`);
     }
 
     if (game.isFull()) {
-      this.logger.error(`room with id: ${gameId} is full`);
       throw new Error(`room with id: ${gameId} is full`);
     }
 
     const player2 = new Player({ name });
-
     game.setPlayer2(player2);
-
-    this.logger.log(`se unio el p2 al gameroom ${JSON.stringify(game)}`);
-    this.logger.debug(
-      `estado del juego despues q se una p2 ${JSON.stringify(game)}`,
-    );
     await this.em.persist(game).flush();
-
     return {
       message: `room with id: ${roomId} joined!`,
       ok: true,
@@ -98,19 +85,15 @@ esta funcion la usa el player 2 para unirse a la room creada, y obtener sus cred
     );
 
     if (game.player1.id === playerId) {
-      this.logger.debug('se conecta el player 1');
       game.player1.isConnected = true;
     } else {
-      this.logger.debug('se conecta el player 2');
       game.player2.isConnected = true;
     }
     await this.em.persistAndFlush(game);
-    this.logger.debug(`estado despues de conectar`, JSON.stringify(game));
     return game;
   }
 
   async moveToGame({ gameId, playerId, row, col, mark }) {
-    this.logger.debug(`moveToGame`);
     const game = await this.gameRepo.findOneOrFail(
       { id: gameId },
       { populate: ['player1', 'player2'] },
@@ -135,7 +118,7 @@ esta funcion la usa el player 2 para unirse a la room creada, y obtener sus cred
       { id: gameId },
       { populate: ['player1', 'player2'] },
     );
-    game.setPlayerWantsToPlayAgain(playerId);
+    game.setPlayerWantsToPlayAgain({ playerId });
     this.em.flush();
     return game;
   }
