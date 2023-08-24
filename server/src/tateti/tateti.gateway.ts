@@ -57,10 +57,8 @@ export class TatetiGateway
   async handleDisconnect(socket: GameSocket) {
     this.logger.log(`Disconnected socket with id: ${socket.id}`);
     try {
-      const roomId = await this.conn.getRoomIdBySocket(socket.id);
-      const playerId = await this.conn.getPlayerIdBySocket(socket.id);
-      const gameId = await this.conn.getGameIdByRoom(roomId);
-      await this.conn.disconnetSocketFromRoom(socket, roomId);
+      const disconnectionData = await this.conn.handleDisconnection(socket.id);
+      const { gameId, playerId, roomId } = disconnectionData;
       const game = await this.gameService.playerDisconnect({
         gameId,
         playerId,
@@ -71,7 +69,6 @@ export class TatetiGateway
     }
     this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
   }
-
   /*
     este mensaje se manda para que socket.io conecte el jugador a la room
     la game_room tiene que haberse creado previamente
@@ -85,14 +82,21 @@ export class TatetiGateway
   ): Promise<any> {
     const { roomId, playerId } = connectToGame;
     try {
+      this.logger.debug('entro al join', roomId);
+      //buscamos el gameId a partir del roomId
       const gameId = await this.conn.getGameIdByRoom(roomId);
+      this.logger.debug(gameId);
       // nos unimos al juego
       const game = await this.gameService.playerEnterGameRoom({
         playerId,
         gameId,
       });
+      //unimos el socket a la room
+      await socket.join(roomId);
       // nos conectamos con redis
-      await this.conn.addConnectionToRoom(socket, roomId);
+      await this.conn.handleConnection(socket.id, roomId, playerId, gameId);
+      //asociamos el socket con la room, cada room tiene dos sockets
+      //asociamos el socket con el player
       this.io.to(roomId).emit('room::game::state', game);
       return {
         message: 'game room joined succesfuly',

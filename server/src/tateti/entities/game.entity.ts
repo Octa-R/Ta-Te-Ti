@@ -228,6 +228,7 @@ export class Game extends BaseEntity<Game, 'id'> {
 
   playerDisconnect(playerId) {
     const player = this.getPlayerById(playerId);
+    console.log('playerDisconnect', player);
     if (player) {
       player.disconnect();
       return true;

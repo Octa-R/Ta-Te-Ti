@@ -104,11 +104,13 @@ esta funcion la usa el player 2 para unirse a la room creada, y obtener sus cred
   }
 
   async playerDisconnect({ gameId, playerId }): Promise<Game> {
+    this.logger.debug(`gameid: ${gameId}, playerid: ${playerId}`);
     const game = await this.gameRepo.findOneOrFail(
       { id: gameId },
       { populate: ['player1', 'player2'] },
     );
     game.playerDisconnect(playerId);
+    this.logger.debug(JSON.stringify(game));
     this.em.flush();
     return game;
   }

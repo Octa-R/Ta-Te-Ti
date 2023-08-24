@@ -5,7 +5,6 @@ import { randomUUID } from 'crypto';
 export class Player extends BaseEntity<Player, 'id'> {
   @PrimaryKey({ hidden: true })
   id: string;
-
   @Property()
   name: string;
   @Property()
