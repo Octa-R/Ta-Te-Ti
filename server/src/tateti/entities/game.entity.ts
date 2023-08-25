@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { Exclude, Type } from 'class-transformer';
 import {
   BaseEntity,
+  Cascade,
   Entity,
   OneToOne,
   PrimaryKey,
@@ -20,9 +21,9 @@ export class Game extends BaseEntity<Game, 'id'> {
   player1WantsToPlayAgain: boolean;
   @Property({ hidden: true })
   player2WantsToPlayAgain: boolean;
-  @OneToOne()
+  @OneToOne({ cascade: [Cascade.REMOVE] })
   player1: Player;
-  @OneToOne({ nullable: true })
+  @OneToOne({ nullable: true, cascade: [Cascade.REMOVE] })
   player2?: Player;
   @Property()
   status: GAME_STATUS = 'WAITING_OPPONENT';
@@ -238,5 +239,11 @@ export class Game extends BaseEntity<Game, 'id'> {
 
   isFull() {
     return this.player1 && this.player2;
+  }
+
+  isEmpty() {
+    return (
+      !this.player1.isConnected && (!this.player2 || !this.player2.isConnected)
+    );
   }
 }

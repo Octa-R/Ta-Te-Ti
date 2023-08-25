@@ -43,6 +43,14 @@ export class ConnectionsService {
     return await this.redis.scard(`${this.roomConnections}:${roomId}`);
   }
 
+  private generateRoomId(): string {
+    return randomString.generate({
+      length: 4,
+      charset: 'alphabetic',
+      capitalization: 'uppercase',
+    });
+  }
+
   async createRoom(gameId: string): Promise<string> {
     const roomId = this.generateRoomId();
     await this.redis.hset(this.roomGame, roomId, gameId);
@@ -53,38 +61,28 @@ export class ConnectionsService {
     const roomId = await this.getRoomIdBySocket(socketId);
     const playerId = await this.getPlayerIdBySocket(socketId);
     const gameId = await this.getGameIdByRoom(roomId);
-    const count = await this.redis.scard(`${this.roomConnections}:${roomId}`);
-    const room = await this.redis.smembers(`${this.roomConnections}:${roomId}`);
+    const count = await this.getRoomConnectionCount(roomId);
+    const promises = [];
     // BORRAR
-    // room.del(socket)
-    const del_socket = this.redis.srem(
-      `${this.roomConnections}:${roomId}`,
-      socketId,
+    // room.del(socket) si se borra el ultimo miembro, borra el set
+    promises.push(
+      this.redis.srem(`${this.roomConnections}:${roomId}`, socketId),
     );
     // socket -> player
-    const socket_player = this.redis.hdel(this.connectionPlayer, socketId);
+    promises.push(this.redis.hdel(this.connectionPlayer, socketId));
     // socket -> room
-    const socket_room = this.redis.hdel(this.connectionRoom, socketId);
+    promises.push(this.redis.hdel(this.connectionRoom, socketId));
     // player -> game
-    const player_game = this.redis.hdel(this.playerGame, playerId);
+    promises.push(this.redis.hdel(this.playerGame, playerId));
     // player -> socket
-    const player_socket = this.redis.hdel(this.playerConnection, playerId);
-
-    await Promise.all([
-      socket_room,
-      socket_player,
-      del_socket,
-      player_game,
-      player_socket,
-    ]);
-
-    this.logger.debug(` estado de la room redis: ${JSON.stringify(room)}`);
+    promises.push(this.redis.hdel(this.playerConnection, playerId));
 
     if (count === 0) {
-      this.logger.debug(
-        'ambos jugadores estan desconectados, se procedera a borar la partida',
-      );
+      promises.push(this.redis.hdel(this.roomGame, roomId));
     }
+
+    await Promise.all([...promises]);
+
     return { roomId, gameId, playerId };
   }
 
@@ -129,19 +127,5 @@ export class ConnectionsService {
       player_game,
       player_socket,
     ]);
-
-    const room = await this.redis.smembers(`${this.roomConnections}:${roomId}`);
-
-    this.logger.debug(
-      `socket:${socketId} -> roomId:${roomId}, ${JSON.stringify(room)}`,
-    );
-  }
-
-  private generateRoomId(): string {
-    return randomString.generate({
-      length: 4,
-      charset: 'alphabetic',
-      capitalization: 'uppercase',
-    });
   }
 }
