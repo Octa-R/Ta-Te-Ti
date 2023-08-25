@@ -38,16 +38,16 @@ export function useGameRoom() {
       roomId: roomId,
     };
 
-    console.log("se va a unir a la gameroom", roomId);
-    console.log(socket.id);
-
     socket.on("disconnect", () => {
       socket.emit("room::game::quit", { roomId, playerId });
     });
 
-    socket.emit("room::game::join", data, (res: any) => {
-      console.log({ respuestaEventoJoin: res });
-    });
+    console.log("se va a unir a la gameroom", roomId);
+    if (roomId) {
+      socket.emit("room::game::join", data, (res: any) => {
+        console.log({ respuestaEventoJoin: res });
+      });
+    }
   };
 
   const onDisconnect = () => {
@@ -75,5 +75,5 @@ export function useGameRoom() {
       socket.off("room::game::state", onGameState);
       socket.off("exception", onException);
     };
-  }, []);
+  }, [roomId]);
 }

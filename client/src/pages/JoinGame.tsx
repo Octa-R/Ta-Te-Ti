@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { Button, Stack, TextInput } from "@mantine/core"
 import { useSetRecoilState } from "recoil";
-import { currentPlayerData, currentRoomIdState } from "../atoms";
+import { currentPlayerData } from "../atoms";
 import { useState } from "react";
+import { PlayerData } from "../interfaces/player-data";
 
 export function JoinGame() {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("")
   const [playerName, setPlayerName] = useState("anon")
   const setCurrentPlayerData = useSetRecoilState(currentPlayerData)
-  const setCurrentRoomId = useSetRecoilState(currentRoomIdState)
 
   const handleClick = () => {
     const fetchData = async () => {
@@ -26,10 +26,14 @@ export function JoinGame() {
         const errorData = await res.json();
         throw new Error(errorData.message || "Error de servidor desconocido");
       }
-      const json = await res.json()
-      console.log("json del post", json)
-      setCurrentPlayerData(json)
-      setCurrentRoomId(json.roomId)
+      const json: PlayerData = await res.json()
+      setCurrentPlayerData({
+        name: json.name,
+        mark: json.mark,
+        isHost: json.isHost,
+        playerId: json.playerId,
+        roomId: json.roomId
+      })
     }
 
     fetchData()
@@ -42,9 +46,9 @@ export function JoinGame() {
 
   }
   return (
-    <Stack className='h-full w-full bg-sky-700' spacing="xl" justify='center' p={16}>
+    <Stack className='h-full w-full bg-sky-700' spacing="xl" justify='center' align="center" p={16}>
       <TextInput
-        color="white"
+        labelProps={{ style: { color: '#FAFAFA' } }}
         required
         size="xl"
         placeholder="anon"
@@ -52,11 +56,12 @@ export function JoinGame() {
         withAsterisk={false}
         label={"Name"}
         value={playerName}
+        w={{ base: 250, sm: 250, md: 300, lg: 400 }}
         onChange={(event) => {
           setPlayerName(event.currentTarget.value)
         }} />
       <TextInput
-        color="white"
+        labelProps={{ style: { color: '#FAFAFA' } }}
         required
         size="xl"
         placeholder="paste your room Id here"
@@ -64,13 +69,16 @@ export function JoinGame() {
         withAsterisk={false}
         label={"Room-id"}
         value={roomId}
+        w={{ base: 250, sm: 250, md: 300, lg: 400 }}
         onChange={(event) => {
           setRoomId(event.currentTarget.value)
         }} />
       <Button onClick={handleClick}
         size='xl'
         variant="filled"
-        fullWidth>
+        w={{ base: 250, sm: 250, md: 300, lg: 400 }}
+        mt={40}
+      >
         Unirse a partida
       </Button>
     </Stack>

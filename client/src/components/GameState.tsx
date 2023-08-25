@@ -78,7 +78,7 @@ export const GameState: React.FC<any> = ({ }) => {
         socket.emit("room::game::play_again", { playerId, roomId }, (response: any) => {
           console.log(response)
         })
-      }, 5000)
+      }, 2500)
     }
   }, [status])
 
