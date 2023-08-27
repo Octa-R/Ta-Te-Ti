@@ -21,13 +21,15 @@ type PlayerStateProps = {
   name: string;
   isConnected: boolean;
   score: number;
+  mark: MARK | ""
 }
 
-export const PlayerState: React.FC<PlayerStateProps> = ({ name, isConnected, score }) => {
+export const PlayerState: React.FC<PlayerStateProps> = ({ name, isConnected, score, mark }) => {
   return (
     <div className="bg-slate-200 rounded-sm font-bold flex justify-around items-center px-4 gap-4">
       <ConnectionState isConnected={isConnected} />
       <span className="uppercase">{name}</span>
+      <span >{mark}</span>
       <span className="proportional-nums ml-auto">{score}</span>
     </div>
   );
@@ -110,8 +112,8 @@ export const GameState: React.FC<any> = ({ }) => {
   return (
     <div className="container text-l w-64 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1 shadow-xl">
       <RoomIdState roomId={roomId} />
-      <PlayerState name={player?.name || ""} score={player?.score || 0} isConnected={player?.isConnected || false} />
-      <PlayerState name={opponent?.name || ""} score={opponent?.score || 0} isConnected={opponent?.isConnected || false} />
+      <PlayerState name={player?.name || ""} score={player?.score || 0} isConnected={player?.isConnected || false} mark={player?.mark || ""} />
+      <PlayerState name={opponent?.name || ""} score={opponent?.score || 0} isConnected={opponent?.isConnected || false} mark={opponent?.mark || ""} />
       <article className="bg-slate-200 rounded-sm font-bold flex py-1 justify-center items-center px-4 gap-4">
         {renderSwitch(status)}
       </article>

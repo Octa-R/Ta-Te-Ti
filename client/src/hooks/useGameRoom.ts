@@ -7,6 +7,7 @@ import {
   socketConnectionState,
 } from "../atoms";
 import { CurrentGameState } from "../interfaces/game-state";
+import { notifications } from "@mantine/notifications";
 
 export function useGameRoom() {
   const setIsConnected = useSetRecoilState(socketConnectionState);
@@ -55,11 +56,11 @@ export function useGameRoom() {
   };
 
   const onGameState = (state: CurrentGameState) => {
-    console.log("llego el estado del juego y se va a actualizar", state);
     setGameState(state);
   };
 
   const onException = (exception: any) => {
+    notifications.show({ message: exception, color: "red" });
     console.warn(exception);
   };
 

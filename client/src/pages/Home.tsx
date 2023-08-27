@@ -11,7 +11,7 @@ export function Home() {
         variant="filled"
         maw={400}
         miw={250}
-        w={{ base: 200, sm: 200, lg: 600 }}
+        w={{ base: 250, sm: 250, md: 350, lg: 400 }}
         onClick={() => {
           navigate("/create-game");
         }}
@@ -23,7 +23,7 @@ export function Home() {
         maw={400}
         miw={250}
         variant="filled"
-        w={{ base: 200, sm: 200, lg: 600 }}
+        w={{ base: 250, sm: 250, md: 350, lg: 400 }}
         onClick={() => {
           navigate("/join-game");
         }}

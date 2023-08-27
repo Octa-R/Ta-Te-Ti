@@ -2,7 +2,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { Board } from "../components/Board";
 import { GameState } from "../components/GameState";
 import { InnerContainer } from "../components/ui/InnerContainer";
-import { useGameRoom } from "../hooks";
+import { useGameRoom } from "../hooks/useGameRoom";
 import { CloseButton } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { PlayerData } from "../interfaces/player-data";
