@@ -3,6 +3,8 @@ import { isMark } from '../decorators/is-mark.decorator';
 export class CreateGameRoomDto {
   @IsNotEmpty()
   @IsString()
+  @MaxLength(10)
+  @MinLength(3)
   name: string;
 
   @isMark()

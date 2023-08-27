@@ -48,7 +48,7 @@ export class TatetiController {
       throw new HttpException(
         {
           status: HttpStatus.NOT_FOUND,
-          error: error.message,
+          message: error.message,
         },
         HttpStatus.FORBIDDEN,
         {
@@ -75,7 +75,7 @@ export class TatetiController {
       throw new HttpException(
         {
           status: HttpStatus.NOT_FOUND,
-          error: error.message,
+          message: error.message,
         },
         HttpStatus.FORBIDDEN,
         {

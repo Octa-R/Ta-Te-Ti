@@ -72,7 +72,6 @@ esta funcion la usa el player 2 para unirse a la room creada, y obtener sus cred
       isHost: false,
     };
   }
-
   /*
   esta funcion se utiliza para cuando los jugadores quieren comenzar el juego
   primero el jugador 1 tiene que crear el juego y e jugador debe haberse unido

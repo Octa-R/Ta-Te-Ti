@@ -67,7 +67,7 @@ export class TatetiGateway
     } catch (error) {
       this.logger.error(error.message || 'unknown error');
     }
-    this.logger.debug(`Number of connected sockets ${this.io.sockets.size}`);
+    this.logger.log(`Number of connected sockets ${this.io.sockets.size}`);
   }
   /*
     este mensaje se manda para que socket.io conecte el jugador a la room
@@ -82,10 +82,8 @@ export class TatetiGateway
   ): Promise<any> {
     const { roomId, playerId } = connectToGame;
     try {
-      this.logger.debug('entro al join', roomId);
       //buscamos el gameId a partir del roomId
       const gameId = await this.conn.getGameIdByRoom(roomId);
-      this.logger.debug(gameId);
       // nos unimos al juego
       const game = await this.gameService.playerEnterGameRoom({
         playerId,
@@ -128,9 +126,10 @@ export class TatetiGateway
       };
     } catch (error) {
       this.logger.error(error);
+      this.logger.debug('estamos en el catch');
       this.io.to(roomId).emit('exception', error.message);
       return {
-        message: error.message,
+        message: error | error.message,
         ok: false,
       };
     }

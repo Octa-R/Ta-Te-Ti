@@ -1,6 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
-import { GameSocket } from '../interfaces';
 import * as randomString from 'randomstring';
 
 @Injectable()
@@ -21,7 +20,7 @@ export class ConnectionsService {
   async getGameIdByRoom(roomId: string): Promise<string> {
     const gameId = await this.redis.hget(this.roomGame, roomId);
     if (!gameId) {
-      throw new Error('gameId not found');
+      throw new Error('Room ID not found');
     }
     return gameId;
   }

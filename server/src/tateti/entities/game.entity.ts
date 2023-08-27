@@ -1,5 +1,3 @@
-import { Logger } from '@nestjs/common';
-import { Exclude, Type } from 'class-transformer';
 import {
   BaseEntity,
   Cascade,
@@ -33,8 +31,6 @@ export class Game extends BaseEntity<Game, 'id'> {
   board: VALUE[][];
   @Property()
   matchResult: MATCH_RESULT;
-  // @Exclude()
-  // private readonly logger: Logger;
 
   constructor(partial: Partial<Game>) {
     super();
@@ -229,7 +225,6 @@ export class Game extends BaseEntity<Game, 'id'> {
 
   playerDisconnect(playerId) {
     const player = this.getPlayerById(playerId);
-    console.log('playerDisconnect', player);
     if (player) {
       player.disconnect();
       return true;
