@@ -7,16 +7,21 @@ const config: Options = {
   entitiesTs: ['./src/**/*.entity.ts'],
   dbName: 'game',
   type: 'postgresql',
+  host: 'postgres', // Nombre del servicio de Docker
+  port: 5432,
   user: 'oruarte',
   password: 'password',
-  port: 5432,
   allowGlobalContext: true,
   metadataProvider: TsMorphMetadataProvider,
   debug: true,
+  // migrations: {
+  //   path: path.join(__dirname, './migrations'),
+  //   glob: '!(*.d).{js,ts}',
+  //   emit: 'js',
+  // },
   migrations: {
-    path: path.join(__dirname, './migrations'),
-    glob: '!(*.d).{js,ts}',
-    emit: 'js',
+    path: 'dist/migrations',
+    pathTs: 'src/migrations',
   },
 };
 

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { PlayerData } from "../interfaces/player-data";
 import { useEffect } from "react";
 import { currentPlayerData } from "../atoms";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 /*
 TODO cuando se recarga la pagina, se pierden los datos de la room
 fijarse que se guarden en localstorage
@@ -63,6 +63,7 @@ export function Game() {
         className="bg-slate-500"
         c="black"
         onClick={() => {
+          removeStorageData()
           navigate("/")
         }
         } />

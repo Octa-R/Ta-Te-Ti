@@ -25,12 +25,12 @@ export class ConnectionsService {
     return gameId;
   }
 
-  async getRoomIdBySocket(socketId: string): Promise<string> {
-    return await this.redis.hget(this.connectionRoom, socketId);
+  getRoomIdBySocket(socketId: string): Promise<string> {
+    return this.redis.hget(this.connectionRoom, socketId);
   }
 
-  async getPlayerIdBySocket(socketId: string): Promise<string> {
-    return await this.redis.hget(this.connectionPlayer, socketId);
+  getPlayerIdBySocket(socketId: string): Promise<string> {
+    return this.redis.hget(this.connectionPlayer, socketId);
   }
 
   async getGameIdBySocketId(socketId: string) {
@@ -38,8 +38,8 @@ export class ConnectionsService {
     return await this.redis.hget(this.playerGame, playerId);
   }
 
-  async getRoomConnectionCount(roomId): Promise<number> {
-    return await this.redis.scard(`${this.roomConnections}:${roomId}`);
+  getRoomConnectionCount(roomId): Promise<number> {
+    return this.redis.scard(`${this.roomConnections}:${roomId}`);
   }
 
   private generateRoomId(): string {
@@ -56,11 +56,45 @@ export class ConnectionsService {
     return roomId;
   }
 
-  async handleDisconnection(socketId: string) {
-    const roomId = await this.getRoomIdBySocket(socketId);
-    const playerId = await this.getPlayerIdBySocket(socketId);
-    const gameId = await this.getGameIdByRoom(roomId);
+  async handleConnection(
+    socketId: string,
+    roomId: string,
+    playerId: string,
+    gameId: string,
+  ) {
     const count = await this.getRoomConnectionCount(roomId);
+    if (count >= 2 || count < 0) {
+      throw new Error('room is full');
+    }
+    const promises = [];
+    // AGREGAR
+    // socket -> room
+    promises.push(this.redis.hset(this.connectionRoom, socketId, roomId));
+    // socket -> player
+    promises.push(this.redis.hset(this.connectionPlayer, socketId, playerId));
+    // player -> game
+    promises.push(this.redis.hset(this.playerGame, playerId, gameId));
+    // player -> connection
+    promises.push(this.redis.hset(this.playerConnection, playerId, socketId));
+    // room.add(socket)
+    promises.push(
+      this.redis.sadd(`${this.roomConnections}:${roomId}`, socketId),
+    );
+    // se ejecutan todas las promesas en paralelo
+    await Promise.all([...promises]);
+  }
+
+  async handleDisconnection(socketId: string) {
+    //buscamos room y player en paralelo
+    const [roomId, playerId] = await Promise.all([
+      this.getRoomIdBySocket(socketId),
+      this.getPlayerIdBySocket(socketId),
+    ]);
+    //contamos jugadores y obtenemos gameid en paralero
+    const [gameId, count] = await Promise.all([
+      this.getGameIdByRoom(roomId),
+      this.getRoomConnectionCount(roomId),
+    ]);
     const promises = [];
     // BORRAR
     // room.del(socket) si se borra el ultimo miembro, borra el set
@@ -79,52 +113,9 @@ export class ConnectionsService {
     if (count === 0) {
       promises.push(this.redis.hdel(this.roomGame, roomId));
     }
-
+    // se ejecutan todas las promesas en paralelo
     await Promise.all([...promises]);
 
     return { roomId, gameId, playerId };
-  }
-
-  async handleConnection(
-    socketId: string,
-    roomId: string,
-    playerId: string,
-    gameId: string,
-  ) {
-    const count = await this.redis.scard(`${this.roomConnections}:${roomId}`);
-    if (count >= 2 || count < 0) {
-      throw new Error('room is full');
-    }
-
-    // AGREGAR
-    // socket -> room
-    const socket_room = this.redis.hset(this.connectionRoom, socketId, roomId);
-    // socket -> player
-    const socket_player = this.redis.hset(
-      this.connectionPlayer,
-      socketId,
-      playerId,
-    );
-    // player -> game
-    const player_game = this.redis.hset(this.playerGame, playerId, gameId);
-    // player -> connection
-    const player_socket = this.redis.hset(
-      this.playerConnection,
-      playerId,
-      socketId,
-    );
-    // room.add(socket)
-    const add_socket = this.redis.sadd(
-      `${this.roomConnections}:${roomId}`,
-      socketId,
-    );
-
-    await Promise.all([
-      socket_room,
-      socket_player,
-      add_socket,
-      player_game,
-      player_socket,
-    ]);
   }
 }

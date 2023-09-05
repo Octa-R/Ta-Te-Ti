@@ -17,6 +17,16 @@ export interface CurrentGameState {
   matchResult: MATCH_RESULT;
 }
 
+export interface GameStateDto {
+  roomId: string;
+  board: VALUE[][];
+  player1: PlayerGameState;
+  player2: PlayerGameState;
+  status: GAME_STATUS;
+  turn: MARK;
+  matchResult: MATCH_RESULT;
+}
+
 export interface ClientToServerEvents {
   ['room::create']: (name: string, callback: (roomId: number) => void) => void;
   ['room::game::init']: () => void;

@@ -48,6 +48,10 @@ export function useGameEndpoint() {
       return json;
     } catch (error: any) {
       console.warn(error.message);
+      notifications.show({
+        message: error.message,
+        color: "red",
+      });
       throw error;
     } finally {
       setIsLoading(false);

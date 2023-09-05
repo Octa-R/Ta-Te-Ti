@@ -15,7 +15,7 @@ import { MoveToGameDto } from './dto/move-to-game.dto';
 import { GameSocket } from './interfaces';
 import { instanceToPlain } from 'class-transformer';
 import { Namespace } from 'socket.io';
-import { TatetiService } from './tateti.service';
+import { TatetiService } from './services/tateti.service';
 import { Redis } from 'ioredis';
 import { Game } from './entities/game.entity';
 import { ConnectToGameDto } from './dto/connectToGame.dto';

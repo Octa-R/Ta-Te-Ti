@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { NewPlayerDataDto } from './dto/new-player-data.dto';
-import { Game } from './entities/game.entity';
-import { Player } from './entities/player.entity';
+import { NewPlayerDataDto } from '../dto/new-player-data.dto';
+import { Game } from '../entities/game.entity';
+import { Player } from '../entities/player.entity';
 import Redis from 'ioredis';
 import { EntityManager, EntityRepository, wrap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { ConnectionsService } from './services/connections.service';
+import { ConnectionsService } from './connections.service';
 
 @Injectable()
 export class TatetiService {

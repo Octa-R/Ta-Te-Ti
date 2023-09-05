@@ -50,7 +50,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "true",
+          "default": "false",
           "mappedType": "boolean"
         }
       },
@@ -117,7 +117,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "string"
         },
         "player2_id": {
@@ -212,7 +212,7 @@
             "id"
           ],
           "referencedTableName": "public.player",
-          "updateRule": "cascade"
+          "deleteRule": "cascade"
         },
         "game_player2_id_foreign": {
           "constraintName": "game_player2_id_foreign",
@@ -224,8 +224,7 @@
             "id"
           ],
           "referencedTableName": "public.player",
-          "deleteRule": "set null",
-          "updateRule": "cascade"
+          "deleteRule": "cascade"
         }
       }
     }

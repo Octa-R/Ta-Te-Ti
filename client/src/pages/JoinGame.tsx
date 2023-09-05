@@ -54,14 +54,23 @@ export function JoinGame() {
         onChange={(event) => {
           setRoomId(event.currentTarget.value)
         }} />
-      <Button onClick={handleClick}
-        size='xl'
-        variant="filled"
-        w={{ base: 250, sm: 250, md: 350, lg: 400 }}
-        mt={40}
-      >
-        Unirse a partida
-      </Button>
+      {isLoading ?
+        <Button loading onClick={handleClick}
+          size='xl'
+          variant="filled"
+          w={{ base: 250, sm: 250, md: 350, lg: 400 }}
+          mt={40}
+        >
+          Unirse a partida
+        </Button> : <Button onClick={handleClick}
+          size='xl'
+          variant="filled"
+          w={{ base: 250, sm: 250, md: 350, lg: 400 }}
+          mt={40}
+        >
+          Unirse a partida
+        </Button>}
+
     </Stack>
   )
 }

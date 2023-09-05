@@ -54,14 +54,24 @@ export function CreateGame() {
         onChange={(m) => {
           setMark(m)
         }} />
-      <Button
+
+      {isLoading ? <Button
+        loading
         onClick={handleClick}
         size='xl'
         variant="filled"
         w={{ base: 250, sm: 250, md: 350, lg: 400 }}
       >
         Crear partida
-      </Button>
+      </Button> : <Button
+        onClick={handleClick}
+        size='xl'
+        variant="filled"
+        w={{ base: 250, sm: 250, md: 350, lg: 400 }}
+      >
+        Crear partida
+      </Button>}
+
 
     </Stack>
   )

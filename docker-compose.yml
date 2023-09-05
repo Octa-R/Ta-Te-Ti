@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: oruarte
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: game
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.2.0-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  nestjs-app:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://oruarte:password@postgres:5432/game
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+
+  react-app:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - nestjs-app
+
+volumes:
+  postgres_data:
