@@ -15,7 +15,7 @@ export function useGameEndpoint() {
 
     try {
       console.log({ mark, name: playerName });
-      const res = await fetch(`http://localhost:3000/tateti/${action}`, {
+      const res = await fetch(`http://nestjs-app/tateti${action}`, {
         method: "POST",
         body: JSON.stringify({ mark, name: playerName, roomId }),
         headers: {

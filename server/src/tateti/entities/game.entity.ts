@@ -14,7 +14,8 @@ export class Game extends BaseEntity<Game, 'id'> {
   @PrimaryKey({ type: 'uuid', hidden: true })
   id: string = randomUUID();
   @Property({ hidden: true })
-  turnCount: number = 0;
+  turnCount = 0;
+
   @Property({ hidden: true })
   player1WantsToPlayAgain: boolean;
   @Property({ hidden: true })

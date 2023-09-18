@@ -9,7 +9,7 @@ export class NewPlayerDataDto {
   @IsString()
   name: string;
 
-  @isMark()
+  // @isMark()
   mark: MARK;
 
   @IsBoolean()

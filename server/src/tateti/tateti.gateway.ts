@@ -9,14 +9,12 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { Inject, Logger, UseFilters } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
 import { ValidationExceptionFilter } from './exceptions/exception.filter';
 import { MoveToGameDto } from './dto/move-to-game.dto';
 import { GameSocket } from './interfaces';
-import { instanceToPlain } from 'class-transformer';
 import { Namespace } from 'socket.io';
 import { TatetiService } from './services/tateti.service';
-import { Redis } from 'ioredis';
 import { Game } from './entities/game.entity';
 import { ConnectToGameDto } from './dto/connectToGame.dto';
 import { ConnectionsService } from './services/connections.service';
@@ -72,7 +70,7 @@ export class TatetiGateway
   /*
     este mensaje se manda para que socket.io conecte el jugador a la room
     la game_room tiene que haberse creado previamente
-    y el jugador 2 se tiene que haber unido 
+    y el jugador 2 se tiene que haber unido
     usando los endpoints http
   */
   @SubscribeMessage('room::game::join')

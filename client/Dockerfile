@@ -1,5 +1,5 @@
 #BUILD
-FROM node:14-alpine as build
+FROM node:18 as build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY . .
 RUN npm run build
 
 #NGINX SERVER
-FROM nginx:alpine
+FROM nginx:alpine3.18
 
 COPY --from=build /app/dist /usr/share/nginx/html
 

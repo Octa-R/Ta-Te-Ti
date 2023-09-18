@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:18.16.1
 
 WORKDIR /app
 
@@ -8,12 +8,8 @@ RUN npm install
 
 COPY . .
 
-RUN npm run migration:create
-
-RUN npm run migration:up
-
 RUN npm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main"]

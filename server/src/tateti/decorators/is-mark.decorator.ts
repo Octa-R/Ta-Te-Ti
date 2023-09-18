@@ -12,12 +12,12 @@ export class CustomValueConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return 'El valor debe ser "X" o "O"';
+    return 'Value must be "X" or "O"';
   }
 }
 
 export function isMark(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: string, propertyName: string) {
     registerDecorator({
       name: 'isMark',
       target: object.constructor,

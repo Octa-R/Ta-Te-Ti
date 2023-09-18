@@ -10,3 +10,11 @@ type SquareClick = {
 type GAME_STATUS = "WAITING_OPPONENT" | "PLAYER_PLAYING" | "OPPONENT_PLAYIG";
 
 type MARK = "X" | "O";
+
+interface ImportMetaEnv {
+  readonly VITE_BASE_URL: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

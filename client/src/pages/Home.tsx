@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export function Home() {
   const navigate = useNavigate();
-
+  console.log("base url", import.meta.env.VITE_BASE_URL)
   return (
     <Stack className='h-full w-full bg-sky-700' spacing="xl" justify='center' align="center" p={16}>
       <Button

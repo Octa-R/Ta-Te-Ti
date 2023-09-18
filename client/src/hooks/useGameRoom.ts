@@ -12,7 +12,6 @@ import { notifications } from "@mantine/notifications";
 export function useGameRoom() {
   const setIsConnected = useSetRecoilState(socketConnectionState);
   const setGameState = useSetRecoilState(currentGameState);
-  // const roomId = useRecoilValue(currentRoomIdState);
   const { name, playerId, roomId, mark } = useRecoilValue(currentPlayerData);
 
   useEffect(() => {
@@ -29,42 +28,41 @@ export function useGameRoom() {
   // corresponden con una gameroom existente
   // entonces
 
-  const onConnect = () => {
-    setIsConnected(true);
+  useEffect(() => {
+    const onConnect = () => {
+      setIsConnected(true);
 
-    const data = {
-      name: name,
-      playerId: playerId,
-      mark: mark,
-      roomId: roomId,
+      const data = {
+        name: name,
+        playerId: playerId,
+        mark: mark,
+        roomId: roomId,
+      };
+
+      socket.on("disconnect", () => {
+        socket.emit("room::game::quit", { roomId, playerId });
+      });
+
+      console.log("se va a unir a la gameroom", roomId);
+      if (roomId) {
+        socket.emit("room::game::join", data, (res: string) => {
+          console.log({ respuestaEventoJoin: res });
+        });
+      }
     };
 
-    socket.on("disconnect", () => {
-      socket.emit("room::game::quit", { roomId, playerId });
-    });
+    const onDisconnect = () => {
+      setIsConnected(false);
+    };
 
-    console.log("se va a unir a la gameroom", roomId);
-    if (roomId) {
-      socket.emit("room::game::join", data, (res: any) => {
-        console.log({ respuestaEventoJoin: res });
-      });
-    }
-  };
+    const onGameState = (state: CurrentGameState) => {
+      setGameState(state);
+    };
 
-  const onDisconnect = () => {
-    setIsConnected(false);
-  };
-
-  const onGameState = (state: CurrentGameState) => {
-    setGameState(state);
-  };
-
-  const onException = (exception: any) => {
-    notifications.show({ message: exception, color: "red" });
-    console.warn(exception);
-  };
-
-  useEffect(() => {
+    const onException = (exception: string) => {
+      notifications.show({ message: exception, color: "red" });
+      console.warn(exception);
+    };
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("room::game::state", onGameState);
@@ -76,5 +74,5 @@ export function useGameRoom() {
       socket.off("room::game::state", onGameState);
       socket.off("exception", onException);
     };
-  }, [roomId]);
+  }, [mark, name, playerId, roomId, setGameState, setIsConnected]);
 }

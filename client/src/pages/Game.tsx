@@ -48,7 +48,7 @@ export function Game() {
     return () => {
       // removeStorageData()
     }
-  }, [storageData])
+  }, [playerData, setPlayerData, setStorageData, storageData])
 
   return (
     <InnerContainer>

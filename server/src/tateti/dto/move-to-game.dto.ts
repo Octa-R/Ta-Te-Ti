@@ -22,8 +22,8 @@ export class MoveToGameDto {
   @IsString()
   playerId: string;
 
-  @isMark()
+  // @isMark()
   @IsNotEmpty()
   @IsString()
-  mark: MARK;
+  mark: string;
 }

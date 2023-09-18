@@ -25,3 +25,7 @@ dist
 # Ignorar archivos temporales
 .DS_Store
 Thumbs.db
+
+Dockerfile
+.dockerignore
+npm-debug.log

@@ -65,7 +65,7 @@ export const RoomIdState: React.FC<RoomIdStateProps> = ({ roomId }) => {
   )
 }
 
-export const GameState: React.FC<any> = ({ }) => {
+export const GameState: React.FC = () => {
   const roomId = useRecoilValue(currentRoomIdState)
   const player = useRecoilValue(currentPlayerGameState)
   const opponent = useRecoilValue(currentOpponentGameState)
@@ -77,14 +77,14 @@ export const GameState: React.FC<any> = ({ }) => {
   useEffect(() => {
     if (status === "GAME_OVER") {
       setTimeout(() => {
-        socket.emit("room::game::play_again", { playerId, roomId }, (response: any) => {
+        socket.emit("room::game::play_again", { playerId, roomId }, (response: unknown) => {
           console.log(response)
         })
       }, 2500)
     }
-  }, [status])
+  }, [playerId, roomId, status])
 
-  const renderSwitch = (param: any) => {
+  const renderSwitch = (param: string) => {
     switch (param) {
       case "WAITING_OPPONENT":
         return "Esperando oponente";

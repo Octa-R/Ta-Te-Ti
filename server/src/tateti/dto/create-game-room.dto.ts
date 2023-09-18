@@ -7,8 +7,7 @@ export class CreateGameRoomDto {
   @MinLength(3)
   name: string;
 
-  @isMark()
+  // @isMark()
   @IsNotEmpty()
-  @IsString()
-  mark: MARK;
+  mark: string;
 }

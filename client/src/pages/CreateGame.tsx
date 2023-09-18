@@ -25,7 +25,9 @@ export function CreateGame() {
         });
         navigate('/game');
       })
-      .catch(() => { });
+      .catch((err) => {
+        console.error(err)
+      });
   };
 
   return (
@@ -40,7 +42,6 @@ export function CreateGame() {
         withAsterisk={false}
         value={playerName}
         w={{ base: 250, sm: 250, md: 350, lg: 400 }}
-
         onChange={(event) => {
           setPlayerName(event.currentTarget.value)
         }}
@@ -54,7 +55,6 @@ export function CreateGame() {
         onChange={(m) => {
           setMark(m)
         }} />
-
       {isLoading ? <Button
         loading
         onClick={handleClick}
@@ -71,8 +71,6 @@ export function CreateGame() {
       >
         Crear partida
       </Button>}
-
-
     </Stack>
   )
 }

@@ -24,7 +24,9 @@ export function JoinGame() {
         });
         navigate('/game');
       })
-      .catch(() => { });
+      .catch(() => {
+        console.error("err")
+      });
   };
   return (
     <Stack className='h-full w-full bg-sky-700' spacing="xl" justify='center' align="center" p={16}>
