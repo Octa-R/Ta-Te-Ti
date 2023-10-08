@@ -32,6 +32,7 @@ services:
       - redis
 
   react-app:
+    # image: ruarteoctavio8/tateti-app:0.1.1
     build: ./client
     ports:
       - 80:80

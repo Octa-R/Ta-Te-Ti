@@ -6,8 +6,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as Joi from 'joi';
 import config from './config/config';
-import { MikroORMOptions } from '@mikro-orm/core';
-
 @Module({
   imports: [
     RedisModule,
@@ -34,27 +32,7 @@ import { MikroORMOptions } from '@mikro-orm/core';
         abortEarly: true,
       },
     }),
-    MikroOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        entities: ['./dist/**/*.entity.js'],
-        entitiesTs: ['./src/**/*.entity.ts'],
-        type: 'postgresql',
-        host: configService.get<string>('DATABASE_HOST'),
-        dbName: configService.get<string>('DATABASE_NAME'),
-        port: configService.get<number>('DATABASE_PORT'),
-        user: configService.get<string>('DATABASE_USERNAME'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        allowGlobalContext: true,
-        metadataProvider: TsMorphMetadataProvider,
-        debug: true,
-        migrations: {
-          path: 'dist/migrations',
-          pathTs: 'src/migrations',
-        },
-      }),
-    }),
+    MikroOrmModule.forRoot({}),
   ],
 })
 export class AppModule {}
