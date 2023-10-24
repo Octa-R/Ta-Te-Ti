@@ -8,7 +8,7 @@ utilizando docker podemos correr las bases de datos necesarias
 docker run \
 --name pg-game-db \
 -e POSTGRES_PASSWORD=password \
--e POSTGRES_USER=usduario \
+-e POSTGRES_USER=oruarte \
 -e POSTGRES_DB=game \
 -d -p 5432:5432 postgres
 

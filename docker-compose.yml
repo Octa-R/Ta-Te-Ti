@@ -2,11 +2,10 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: oruarte
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: game
+    image: postgres:16
+    container_name: pg-database
+    env_file:
+      - ./.env.pg.production
     restart: always
     ports:
       - 5432:5432
@@ -21,7 +20,8 @@ services:
       - 6379:6379
 
   nestjs-app:
-    build: ./server
+    image: ruarteoctavio8/tateti-backend:0.1.0
+    container_name: nestjs-app
     restart: always
     env_file:
       - ./.env.server.production
@@ -32,8 +32,9 @@ services:
       - redis
 
   react-app:
-    # image: ruarteoctavio8/tateti-app:0.1.1
-    build: ./client
+    image: ruarteoctavio8/tateti-app:0.1.1
+    container_name: react-webapp
+    restart: always
     ports:
       - 80:80
     depends_on:

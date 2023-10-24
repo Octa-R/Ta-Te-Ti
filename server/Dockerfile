@@ -1,27 +1,31 @@
-# Etapa de construcción
-FROM node:18.16.1-alpine AS builder
+FROM node:18-alpine as deps
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm ci
+
+FROM node:18-alpine as builder
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
 RUN npm run build
 
-# # Etapa de producción
-# FROM node:18.16.1-alpine
+FROM node:18-alpine as runner
 
-# WORKDIR /app
+WORKDIR /app
 
-# # Copia solo los archivos necesarios de la etapa de construcción
-# COPY --from=builder /app/dist ./dist
+COPY package.json package-lock.json ./
 
-# Exponer el puerto si es necesario
+RUN npm install --production
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
 
-# Comando de inicio de la aplicación
 CMD ["node", "./dist/main"]
-

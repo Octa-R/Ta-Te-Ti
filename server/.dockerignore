@@ -1,8 +1,5 @@
-# Archivos y carpetas específicos para ignorar en el contexto de Docker
-
-# Ignorar node_modules excepto el package-lock.json
-node_modules
-!node_modules/**/package-lock.json
+node_modules/
+.git/
 
 # Ignorar archivos de respaldo
 *.log
@@ -15,8 +12,7 @@ yarn-error.log*
 
 # Ignorar archivos de caché
 .cache
-dist
-
+dist/
 
 # Ignorar archivos de IDE y editor
 .vscode

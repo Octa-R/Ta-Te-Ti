@@ -15,7 +15,7 @@ export function useGameEndpoint() {
 
     try {
       console.log({ mark, name: playerName });
-      const res = await fetch(`http://nestjs-app/tateti/${action}`, {
+      const res = await fetch(import.meta.env.VITE_BASE_URL + action, {
         method: "POST",
         body: JSON.stringify({ mark, name: playerName, roomId }),
         headers: {
@@ -51,6 +51,9 @@ export function useGameEndpoint() {
       notifications.show({
         message: error.message,
         color: "red",
+        onOpen: () => {
+          console.log("hola ", notifications);
+        },
       });
       throw error;
     } finally {

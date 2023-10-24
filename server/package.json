@@ -16,6 +16,8 @@
     "test": "jest",
     "migration:up": "mikro-orm migration:up",
     "migration:create": "mikro-orm migration:create",
+    "migrate:prod": "ts-node ./dist/migrate.js",
+    "migrate:dev": "ts-node ./src/migrate.ts",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",

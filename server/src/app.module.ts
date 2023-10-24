@@ -2,8 +2,7 @@ import { TatetiModule } from './tateti/tateti.module';
 import { RedisModule } from './redis/redis.module';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import config from './config/config';
 @Module({
@@ -11,7 +10,7 @@ import config from './config/config';
     RedisModule,
     TatetiModule,
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       load: [config],
       isGlobal: true,
       validationSchema: Joi.object({
