@@ -24,7 +24,7 @@ services:
       - game-net
 
   nestjs-app:
-    image: pepito/backend:0.1.0
+    image: ruarteoctavio8/tateti-backend:0.1.0
     container_name: nestjs-app
     restart: always
     env_file:
@@ -38,7 +38,7 @@ services:
       - game-net
 
   react-app:
-    image: pepito/app:0.1.1
+    build: ./client
     container_name: react-webapp
     restart: always
     ports:
