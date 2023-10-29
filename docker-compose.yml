@@ -5,12 +5,14 @@ services:
     image: postgres:16
     container_name: pg-database
     env_file:
-      - ./.env.pg.production
+      - ./.env.pg
     restart: always
     ports:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - game-net
 
   redis:
     image: redis:7.2
@@ -18,27 +20,36 @@ services:
     restart: always
     ports:
       - 6379:6379
+    networks:
+      - game-net
 
   nestjs-app:
-    image: ruarteoctavio8/tateti-backend:0.1.0
+    image: pepito/backend:0.1.0
     container_name: nestjs-app
     restart: always
     env_file:
-      - ./.env.server.production
+      - ./.env.server
     ports:
       - 3000:3000
     depends_on:
       - postgres
       - redis
+    networks:
+      - game-net
 
   react-app:
-    image: ruarteoctavio8/tateti-app:0.1.1
+    image: pepito/app:0.1.1
     container_name: react-webapp
     restart: always
     ports:
       - 80:80
     depends_on:
       - nestjs-app
+    networks:
+      - game-net
 
+networks:
+  game-net:
+    driver: bridge
 volumes:
   postgres_data:
