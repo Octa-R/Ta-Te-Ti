@@ -8,6 +8,7 @@ export const redisClientFactory: FactoryProvider<Redis> = {
     return new Redis({
       port: configService.get('REDIS_PORT'),
       host: configService.get('REDIS_HOST'),
+      password: configService.get('REDIS_PASSWORD'),
     });
   },
   inject: [ConfigService],
