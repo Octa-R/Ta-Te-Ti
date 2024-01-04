@@ -8,6 +8,6 @@ async function bootstrap() {
   app.enableCors({ origin: '*' });
   await app.get(MikroORM).getSchemaGenerator().ensureDatabase();
   await app.get(MikroORM).getSchemaGenerator().updateSchema();
-  await app.listen(3000);
+  await app.listen(process.env.PORT || process.env.APP_PORT);
 }
 bootstrap();
