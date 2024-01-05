@@ -13,9 +13,14 @@ const config: Options = {
   allowGlobalContext: true,
   metadataProvider: TsMorphMetadataProvider,
   debug: process.env['NODE_ENV'] === 'production' ? false : true,
+  schemaGenerator: {
+    disableForeignKeys: false, // try to disable foreign_key_checks (or equivalent) // prevents error permission denied to set parameter "session_replication_role"
+    createForeignKeyConstraints: true, // do not generate FK constraints
+  },
   migrations: {
     path: 'dist/migrations',
     pathTs: 'src/migrations',
+    disableForeignKeys: false,
   },
 };
 
