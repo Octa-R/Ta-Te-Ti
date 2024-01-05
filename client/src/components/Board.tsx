@@ -1,5 +1,5 @@
 import { useRecoilValue } from "recoil";
-import { currentBoardState, currentPlayerData } from "../atoms";
+import { currentBoardState, currentPlayerData } from "atoms";
 import { socket } from "lib/socket.io-client";
 import { XMark } from "components/ui/icons/Xmark";
 import { OMark } from "components/ui/icons/OMark";
@@ -35,7 +35,6 @@ export function Board() {
 	const { roomId, playerId, mark } = useRecoilValue(currentPlayerData);
 
 	const handleSquareClick = ({ value, position }: SquareClick) => {
-		console.log("value y pos", value, position);
 		const { row, col } = position;
 		const moveToGame = {
 			row,
@@ -44,7 +43,6 @@ export function Board() {
 			playerId,
 			mark,
 		};
-		// console.log("se va a hacer la siguiente jugada: ", moveToGame)
 		socket.emit("room::game::move", moveToGame, (res) => {
 			console.log("respuesta servidor desppues del move: ", res);
 		});
