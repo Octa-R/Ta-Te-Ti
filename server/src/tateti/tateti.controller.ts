@@ -66,7 +66,7 @@ export class TatetiController {
   ): Promise<NewPlayerDataDto> {
     try {
       const { roomId } = joinGameRoomDto;
-      const gameId = await this.conn.getGameIdByRoom(roomId);
+      const gameId = await this.conn.getGameIdByRoom(roomId.toUpperCase());
       return await this.tatetiService.joinGameRoom({
         ...joinGameRoomDto,
         gameId,

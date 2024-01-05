@@ -3,8 +3,8 @@
 type SquareValue = "X" | "O" | " ";
 
 type SquareClick = {
-  value: SquareValue;
-  position: { row: number; col: number };
+	value: SquareValue;
+	position: { row: number; col: number };
 };
 
 type GAME_STATUS = "WAITING_OPPONENT" | "PLAYER_PLAYING" | "OPPONENT_PLAYIG";
@@ -12,10 +12,11 @@ type GAME_STATUS = "WAITING_OPPONENT" | "PLAYER_PLAYING" | "OPPONENT_PLAYIG";
 type MARK = "X" | "O";
 
 interface ImportMetaEnv {
-  readonly VITE_BASE_URL: string;
-  readonly VITE_REDIS_URL: string;
+	readonly VITE_BASE_URL: string;
+	readonly VITE_REDIS_URL: string;
+	readonly VITE_SOCKET_IO_URL: string;
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv;
+	readonly env: ImportMetaEnv;
 }
