@@ -13,7 +13,6 @@ type MARK = "X" | "O";
 
 interface ImportMetaEnv {
 	readonly VITE_BASE_URL: string;
-	readonly VITE_REDIS_URL: string;
 	readonly VITE_SOCKET_IO_URL: string;
 }
 

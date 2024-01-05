@@ -72,7 +72,8 @@ cd client
 ```
 
 ```bash
-echo "VITE_BASE_URL=http://localhost:3000/tateti/" > .env.development.local
+echo "VITE_BASE_URL=http://localhost:3000/tateti/
+VITE_SOCKET_IO_URL=http://localhost:3000/game/" > .env.development.local
 ```
 
 ```bash

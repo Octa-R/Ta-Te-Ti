@@ -34,7 +34,7 @@ export function Board() {
 	const board = useRecoilValue(currentBoardState);
 	const { roomId, playerId, mark } = useRecoilValue(currentPlayerData);
 
-	const handleSquareClick = ({ value, position }: SquareClick) => {
+	const handleSquareClick = ({ position }: SquareClick) => {
 		const { row, col } = position;
 		const moveToGame = {
 			row,
