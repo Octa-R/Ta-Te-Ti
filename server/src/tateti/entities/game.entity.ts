@@ -126,18 +126,12 @@ export class Game extends BaseEntity<Game, 'id'> {
     }
 
     // si el turno la marca y la marca del player son iguales
-    if (
-      this.turn !== player.mark ||
-      this.turn !== mark ||
-      player.mark !== mark
-    ) {
+    if (this.turn !== player.mark || this.turn !== mark) {
       throw new Error('no es el turno del jugador');
     }
 
-    // si el turno la marca y la marca del player son iguales
-    if (this.turn === player.mark && this.turn === mark) {
-      this.board[row][col] = mark;
-    }
+    //hacemos la jugada
+    this.board[row][col] = mark;
 
     //siguiente turno
     if (this.turn === 'O') {
