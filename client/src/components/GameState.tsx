@@ -124,7 +124,7 @@ export const GameState: React.FC = () => {
 	};
 
 	return (
-		<div className="container text-l w-64 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1 shadow-xl">
+		<div className="container text-m w-60 border-solid text-indigo-700 rounded-sm p-1 border-slate-300 max-w-md bg-slate-500 grid grid-rows-3 gap-1 shadow-xl">
 			<RoomIdState roomId={roomId} />
 			<PlayerState
 				name={player?.name || ""}

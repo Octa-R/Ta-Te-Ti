@@ -32,20 +32,12 @@ export function Game() {
 	useEffect(() => {
 		// si en la app hay datos, se guarda en el storage
 		if (storageData.playerId === "") {
-			console.log(
-				"no hay data en storage, se va a guardar la data",
-				playerData
-			);
 			setStorageData(playerData);
 		}
 		//si en la app no hay datos, se busca en el storage
 		if (playerData.playerId === "") {
-			console.log("playerData es null y hay algo en el storage?", storageData);
 			if (storageData.playerId !== "") {
-				console.log("se va a guardar lo del storage en recoil");
 				setPlayerData(storageData);
-			} else {
-				console.log("no hay nada en el storage");
 			}
 		}
 		return () => {

@@ -13,7 +13,6 @@ import { ValidationError } from 'class-validator';
 @Catch(WsException)
 export class ValidationExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
-    console.log('hola soy el catch');
     Logger.log(
       'acordate de buscar formas de informar sobre los errores de validacion de input',
     );

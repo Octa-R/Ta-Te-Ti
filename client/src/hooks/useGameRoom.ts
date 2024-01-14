@@ -43,7 +43,6 @@ export function useGameRoom() {
 				socket.emit("room::game::quit", { roomId, playerId });
 			});
 
-			console.log("se va a unir a la gameroom", roomId);
 			if (roomId) {
 				socket.emit("room::game::join", data, (res: string) => {
 					console.log({ respuestaEventoJoin: res });

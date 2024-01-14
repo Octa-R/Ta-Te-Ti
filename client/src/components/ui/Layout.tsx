@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 
 function Layout() {
 	const location = useLocation();
-	console.log(location);
 	return (
 		<div className="h-screen bg-sky-900">
 			<Header />
