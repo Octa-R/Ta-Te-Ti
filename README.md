@@ -1,8 +1,10 @@
 # Ta-Te-Ti
 
-versión online del juego tateti o tic-tac-toe
+versión online para dos jugadores del juego tateti o tic-tac-toe
 
-## Requisitos
+[deploy 🚀🚀🚀](https://ta-te-ti-six-pi.vercel.app/)
+
+## Requisitos para correrlo localmente
 
 - Docker
 - Nodejs
@@ -11,7 +13,7 @@ versión online del juego tateti o tic-tac-toe
 
 ### Configurar bases de datos
 
-postgres db
+iniciar contenedor postgres
 
 ```bash
 docker run \
@@ -22,7 +24,7 @@ docker run \
 -d -p 5432:5432 postgres
 ```
 
-redis db
+iniciar contenedor redis
 
 ```bash
 docker run --name redis-game-db -p 6379:6379 redis:7.2
@@ -71,6 +73,8 @@ cd ..
 cd client
 ```
 
+crear archivo .env
+
 ```bash
 echo "VITE_BASE_URL=http://localhost:3000/tateti/
 VITE_SOCKET_IO_URL=http://localhost:3000/game/" > .env.development.local
@@ -107,6 +111,11 @@ DATABASE_NAME=game
 REDIS_PORT=6379
 REDIS_HOST=redis
 APP_PORT=3000" > .env.server
+```
+
+```bash
+echo "VITE_BASE_URL=http://localhost:3000/tateti/
+VITE_SOCKET_IO_URL=http://localhost:3000/game/" > .env.client
 ```
 
 ```bash
