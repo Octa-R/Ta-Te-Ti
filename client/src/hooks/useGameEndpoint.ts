@@ -37,7 +37,7 @@ export function useGameEndpoint() {
 						color: "red",
 					});
 				}
-				throw new Error(errorData.message || "Error de servidor desconocido");
+				throw new Error(errorData.message);
 			}
 
 			const json = await res.json();

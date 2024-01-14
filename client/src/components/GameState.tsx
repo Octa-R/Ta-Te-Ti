@@ -47,8 +47,8 @@ type RoomIdStateProps = {
 export const RoomIdState: React.FC<RoomIdStateProps> = ({ roomId }) => {
 	return (
 		<article className="bg-slate-200 rounded-sm font-bold flex py-1 justify-start items-center px-4 gap-4">
-			<div className="h-2 w-2 "></div>
-			<label>Room-ID:</label>
+			<div className="h-2 w-2 " />
+			<div>Room-ID:</div>
 			<div className="flex rounded-md border-2 grow-1 ml-auto">
 				<div className="bg-slate-300 text-black rounded align-middle border border-slate-600 flex flex-row  justify-between grow-1">
 					<Code fz={16} className="bg-slate-300">
@@ -103,7 +103,7 @@ export const GameState: React.FC = () => {
 			case "PLAYING":
 				return (
 					<>
-						<label>Turn: </label>
+						<div>Turn: </div>
 						{turn === "X" ? <XMark size="sm" /> : <OMark size="sm" />}
 					</>
 				);
