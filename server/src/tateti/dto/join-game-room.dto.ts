@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class JoinGameRoomDto {
-  @MinLength(4)
+  @MinLength(3)
   @MaxLength(15)
   @IsNotEmpty()
   @IsString()
